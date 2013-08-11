@@ -1,0 +1,26 @@
+application: www-ardux
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: yes
+
+libraries:
+- name: jinja2
+  version: "latest"
+
+- name: markupsafe
+  version: "latest"
+
+handlers:
+- url: /favicon\.ico
+  static_files: favicon.ico
+  upload: favicon\.ico
+
+- url: /media/
+  static_dir : media
+
+- url: /_ah/spi/.*
+  script: ardux.api.application
+
+- url: .*
+  script: run.app

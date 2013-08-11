@@ -1,0 +1,14 @@
+{% extends 'admin/master.html' %}
+{% block head %}
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js" type="text/javascript"></script>
+    <script type="text/javascript" src="/media/js/app.js"></script>
+    <script type="text/javascript" src="/media/js/services.js"></script>
+    <script type="text/javascript" src="/media/js/controllers.js"></script>
+    <script type="text/javascript">
+        function load_apis(){
+            initialize('//' + window.location.host + '/_ah/api')
+        }
+
+    </script>
+    <script src="https://apis.google.com/js/client.js?onload=load_apis"></script>
+{% endblock %}
