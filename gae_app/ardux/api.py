@@ -6,6 +6,16 @@ import uuid
 @endpoints.api(name='devices', version='v1', description='Eforcers ResourceDevice API')
 class ResourceDeviceApi(remote.Service):
 
+    @ResourceDevice.method(path='device/register',
+                        http_method='POST',
+                        name='device.register')
+    def ResourceDeviceRegister(self, device):
+        if device.uuid is None:
+            device.uuid = str(uuid.uuid1())
+        #device.put()
+        return device
+
+
     @ResourceDevice.method(path='device',
                         http_method='POST',
                         name='device.insert')

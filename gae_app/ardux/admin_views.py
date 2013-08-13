@@ -24,7 +24,13 @@ class AuthView(BaseView):
 class AdminIndex(AuthView,AdminIndexView):
     @expose('/')
     def index(self):
-        return self.render('index.html')
+        return self.render('admin_index.html')
+
+class Devices(AuthView):
+    @expose('/')
+    def index(self):
+        return self.render('admin_devices.html')
+
 
 class AuthView(AuthView):
 
@@ -87,4 +93,4 @@ class AuthView(AuthView):
         request_token = AuthorizeRequestToken(saved_request_token, request.url)
         access_token = self.client.GetAccessToken(request_token)
         AeSave(access_token, ACCESS_TOKEN)
-        return 'Yes'
+        return self.render('admin_after_auth.html')

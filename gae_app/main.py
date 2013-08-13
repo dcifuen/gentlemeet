@@ -23,4 +23,7 @@ app = flask_app
 from ardux import admin_views
 from ardux import views
 
-admin.add_view( admin_views.AuthView(name = 'Auth' ,endpoint='oauth', static_url_path=True))
+#*********** Admin Views *****************
+admin.add_view( admin_views.Devices(name = 'Devices' ,endpoint='devices', static_url_path=True))
+admin.add_view( admin_views.AuthView(name = 'Authorize' ,endpoint='oauth', static_url_path=True))
+
