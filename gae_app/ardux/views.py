@@ -27,8 +27,10 @@ def device_register():
     return flask.jsonify(device.to_dict())
 
 
-@app.route('/device/sync/{uuid}', methods=['POST'])
+@app.route('/device/sync/<uuid>')
 def device_sync(uuid):
-    device = ndb.Key(uuid = uuid).get()
-    device = ResourceDevice()
-    return flask.jsonify(device.to_dict())
+    device = ResourceDevice.query(ResourceDevice.uuid == uuid).fetch(1)[0]
+    if device:
+        return flask.jsonify(device.to_dict())
+    else:
+        return 'Device not found', 404

@@ -9,6 +9,7 @@
 #include "HTTPResponse.h"
 #include <aJSON.h>
 
+
 #define WAITING_TICKS 2 //Multiply this with 6 seconds to find the time
 //#define  RESET_CONF_ON_START 1
 
@@ -31,7 +32,7 @@ void setup()
       DBG("************ ArDuX *************\r\n");
   #endif
   #ifdef RESET_CONF_ON_START
-      EEPROM_clear();
+      device.clear();
       wifly.reset(); 
   #endif
   while (1) {
@@ -53,6 +54,7 @@ void setup()
   
   if (strlen(device.configuration.uuid) > 0){
      DBG("Device UID " + String(device.configuration.uuid) + "\r\n");
+     DBG("Device Name " + String(device.configuration.name) + "\r\n");
      DBG("Has resource? " + String(device.configuration.has_resource ? "Yes" : "No") + "\r\n");
   }
 }
@@ -66,10 +68,16 @@ void loop()
     if(strlen(device.configuration.uuid) == 0){
         DBG("No UID found \r\n");
         if(device.register_device()){
+          DBG("Device registered \r\n");
         }else{
+          DBG("Error registering device \r\n");
         }
      }else{
-       
+       if(device.sync_device()){
+          DBG("Device synced \r\n");
+        }else{
+          DBG("Error syncing device \r\n");
+        }
      }
   }
 }

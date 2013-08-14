@@ -9,9 +9,10 @@ class UsersMiddleware(object):
         self.app = app
     def __call__(self, environ, start_response):
         user = users.get_current_user()
-        db_user = ndb.Key(User,user.email()).get()
-        if not db_user:
-            db_user = User(id = user.email())
-            db_user.is_admin = users.is_current_user_admin()
-            db_user.put()
+        if user:
+            db_user = ndb.Key(User,user.email()).get()
+            if not db_user:
+                db_user = User(id = user.email())
+                db_user.is_admin = users.is_current_user_admin()
+                db_user.put()
         return self.app(environ, start_response)

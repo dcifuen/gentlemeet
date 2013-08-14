@@ -1,3 +1,6 @@
+#ifndef __EEPROM_STRUCT_H__
+#define __EEPROM_STRUCT_H__
+
 #include <EEPROM.h>
 #include <Arduino.h>  // for type definitions
 #define EEPROM_SIZE 4096
@@ -27,4 +30,4 @@ void EEPROM_clear()
       EEPROM.write(i, 0);
 }
 
-
+#endif // __EEPROM_STRUCT_H__
