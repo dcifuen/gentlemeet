@@ -1,4 +1,5 @@
 from ardux.admin_views import AdminIndex
+from ardux.middlewares import UsersMiddleware
 from flask.app import Flask
 from flask.ext.admin.base import MenuLink
 from werkzeug.debug import DebuggedApplication
@@ -13,6 +14,7 @@ flask_app.config.from_object(settings)
 
 admin = Admin(flask_app, name='ArDuX', index_view=AdminIndex(url='/admin', name='Home'), )
 admin.add_link(MenuLink(name='Logout',url = users.create_logout_url('/')))
+flask_app.wsgi_app = UsersMiddleware(flask_app.wsgi_app)
 
 if flask_app.config['DEBUG']:
     flask_app.debug = True
@@ -25,5 +27,5 @@ from ardux import views
 
 #*********** Admin Views *****************
 admin.add_view( admin_views.Devices(name = 'Devices' ,endpoint='devices', static_url_path=True))
-admin.add_view( admin_views.AuthView(name = 'Authorize' ,endpoint='oauth', static_url_path=True))
+admin.add_view( admin_views.OAuthView(name = 'Authorize' ,endpoint='oauth', static_url_path=True))
 

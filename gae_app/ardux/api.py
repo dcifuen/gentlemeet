@@ -32,4 +32,3 @@ class ResourceDeviceApi(remote.Service):
         return query
 
 
-application = endpoints.api_server([ResourceDeviceApi], restricted=False)

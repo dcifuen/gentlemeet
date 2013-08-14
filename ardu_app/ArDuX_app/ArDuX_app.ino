@@ -1,6 +1,5 @@
 #include "Debug.h"
 #include <EEPROM.h>
-#include "EEPROMStruct.h"
 #include "TimerOne.h"
 #include <Arduino.h>
 #include <SoftwareSerial.h>
@@ -18,17 +17,12 @@
 // WIFLY_AUTH_OPEN / WIFLY_AUTH_WPA1 / WIFLY_AUTH_WPA1_2 / WIFLY_AUTH_WPA2_PSK
 #define AUTH      WIFLY_AUTH_WPA2_PSK
 
-
+boolean sync_flag = false;
 int timer_ticks = 0;
 WiFly wifly(12, 3);
 Device device;
 
-struct config_t
-{
-    char uid[50];
-    boolean new_device; 
-};
-config_t configuration = {};
+
 void setup()
 {
   
@@ -57,42 +51,38 @@ void setup()
   Timer1.initialize(8000000);
   Timer1.attachInterrupt(sync);
   
-     
-  EEPROM_readStruct(0, configuration);
-  if (strlen(configuration.uid) > 0){
-     DBG("Device UID " + String(configuration.uid) + "\r\n");
-     DBG("Is new Device? " + String(configuration.new_device ? "Yes" : "No") + "\r\n");
+  if (strlen(device.configuration.uuid) > 0){
+     DBG("Device UID " + String(device.configuration.uuid) + "\r\n");
+     DBG("Has resource? " + String(device.configuration.has_resource ? "Yes" : "No") + "\r\n");
   }
 }
 void loop()
 {
-     
-  if(strlen(configuration.uid) == 0){
-      DBG("No UID found \r\n");
-      device.register_device();
-      //EEPROM_writeStruct(0, configuration);
-   }else{
-     
-   }
   
+  //********* SYNC *************//
+  if(sync_flag){
+    sync_flag = false;
+    DBG("Sync in progress...\r\n");
+    if(strlen(device.configuration.uuid) == 0){
+        DBG("No UID found \r\n");
+        if(device.register_device()){
+        }else{
+        }
+     }else{
+       
+     }
+  }
 }
 
 void sync(){
   //Sync every minute
   if(timer_ticks >=2 ){
     timer_ticks = 0;
-    DBG("Sync in progress...\r\n");
-    if(strlen(configuration.uid) == 0){
-      DBG("No UID found \r\n");
-      //device.register_device();
-      //EEPROM_writeStruct(0, configuration);
-    }
-  
+    sync_flag = true;
   }else{
     timer_ticks++;
     int wait_time = (WAITING_TICKS - timer_ticks + 1)*8;
     //DBG("Waiting for Sync " + String(wait_time) + " secs \r\n");
-  }
-    
+  } 
 }
 

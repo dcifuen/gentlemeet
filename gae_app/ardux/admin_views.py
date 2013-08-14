@@ -1,11 +1,12 @@
 from google.appengine.api import users
+from google.appengine.ext import ndb
 from ardux.helpers import OAuthHelper
 from flask.ext.admin import BaseView, expose
 from flask.ext.admin.base import AdminIndexView
 from settings import API_KEY, OAUTH_SCOPE, CONSUMER_SECRET
 from werkzeug.routing import RequestRedirect
 from flask import helpers
-from ardux.models import Client
+from ardux.models import Client, User
 from flask import redirect, request
 from gdata.docs.client import DocsClient
 from gdata.gauth import AuthorizeRequestToken, AeSave, AeLoad
@@ -16,8 +17,10 @@ ACCESS_TOKEN = 'AccessToken'
 
 class AuthView(BaseView):
     def is_accessible(self):
-        if users.is_current_user_admin():
-            return True
+        user = users.get_current_user()
+        if user:
+            db_user = User.get_by_id(user.email())
+            return db_user.is_admin
         else:
             raise RequestRedirect(users.create_login_url(self.url))
 
@@ -32,7 +35,7 @@ class Devices(AuthView):
         return self.render('admin_devices.html')
 
 
-class AuthView(AuthView):
+class OAuthView(AuthView):
 
     client = DocsClient(source='ArDuX')
 
@@ -48,6 +51,7 @@ class AuthView(AuthView):
                 oauthHelper = OAuthHelper(redirect_uri)
         else:
             client = Client(id = domain)
+            client.installer_user = users.get_current_user().email()
             client.put()
             oauthHelper = OAuthHelper(redirect_uri)
 
@@ -94,3 +98,16 @@ class AuthView(AuthView):
         access_token = self.client.GetAccessToken(request_token)
         AeSave(access_token, ACCESS_TOKEN)
         return self.render('admin_after_auth.html')
+
+    def is_accessible(self):
+        user = users.get_current_user()
+        if user:
+            domain = users.get_current_user().email().split('@')[1]
+            client = Client.get_by_id(domain)
+            if client:
+                db_user = User.get_by_id(user.email())
+                return user.email() == client.installer_user
+            else:
+                return True
+        else:
+            raise RequestRedirect(users.create_login_url(self.url))
