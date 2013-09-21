@@ -19,7 +19,7 @@ int HTTPClient::get(const char *url, int timeout)
 HTTPResponse HTTPClient::getResponse(const char *url, int timeout)
 {
   String response;
-  while (get(url,timeout) < 0){}
+  get(url,timeout);
   while (wifly->receive((uint8_t *)&get_char, 1, 1000) == 1) {
       response += get_char;
   }
@@ -46,7 +46,7 @@ int HTTPClient::post(const char *url, const char *data, int timeout)
 HTTPResponse HTTPClient::postResponse(const char *url, const char *data, int timeout)
 {
   String response;
-  while (post(url,data,timeout) < 0){}
+  post(url,data,timeout);
   while (wifly->receive((uint8_t *)&get_char, 1, 1000) == 1) {
       response += get_char;
   }

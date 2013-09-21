@@ -9,6 +9,7 @@ Device::Device()
 {
   wifly = WiFly::getInstance();
   EEPROM_readStruct(0, configuration);
+  read_nfc = false;
 }
 int Device::clear(){
   EEPROM_clear();
@@ -18,7 +19,7 @@ int Device::register_device(){
   char buf[100];
   HTTPResponse response;
   url.toCharArray(buf, 100);
-  response = http.postResponse(buf,"device", 10000);
+  response = http.postResponse(buf,"device", 1000);
   if(response.code == 200){
     DBG("Data recieved OK \r\n");
     char buff[response.content_length+10];
@@ -42,7 +43,7 @@ int Device::sync_device(){
   char buf[100];
   HTTPResponse response;
   url.toCharArray(buf, 100);
-  response = http.getResponse(buf, 10000);
+  response = http.getResponse(buf, 1000);
   if(response.code == 200){
     DBG("Data recieved OK \r\n");
     char buff[response.content_length+10];

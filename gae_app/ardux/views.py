@@ -1,4 +1,5 @@
-import uuid
+import random
+import string
 from ardux.models import ResourceDevice
 import flask
 from main import app
@@ -20,9 +21,7 @@ def warmup():
 
 @app.route('/device/register', methods=['POST'])
 def device_register():
-    device = ResourceDevice(uuid = str(uuid.uuid1()))
-    if device.uuid is None:
-            device.uuid = str()
+    device = ResourceDevice(uuid = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(5)))
     device.put();
     return flask.jsonify(device.to_dict())
 

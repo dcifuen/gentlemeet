@@ -1,7 +1,7 @@
 from oauth2client.client import OAuth2WebServerFlow, Credentials
 from settings import OAUTH2_CLIENT_ID, OAUTH2_CLIENT_SECRET, OAUTH2_SCOPE
 import gdata
-
+from main import app
 
 class OAuthHelper(object):
     """ OAuth dance helper class"""
@@ -23,3 +23,25 @@ class OAuthHelper(object):
 
     def get_credentials(self, credentials_json):
         return Credentials.new_from_json(credentials_json)
+
+
+class CalendarResourcesHelper(object):
+    def __init__(self,domain):
+        self.client = gdata.calendar_resource.client.CalendarResourceClient(source=app.config['SOURCE_APP_NAME'],domain=domain)
+        self.client.http_client.debug = DEBUG
+        access_token = gdata.gauth.AeLoad(ACCESS_TOKEN)
+        self.client.http_client.debug = False
+        self.client.auth_token = gdata.gauth.OAuthHmacToken(app.config['CONSUMER_KEY'], app.config['CONSUMER_SECRET'],
+                                                       access_token.token, access_token.token_secret,
+                                                       gdata.gauth.ACCESS_TOKEN, next=None, verifier=None)
+
+
+    def setup_token(self):
+        access_token = gdata.gauth.AeLoad(ACCESS_TOKEN)
+        self.client.http_client.debug = False
+        self.client.auth_token = gdata.gauth.OAuthHmacToken(CONSUMER_KEY, CONSUMER_SECRET,
+                                                       access_token.token, access_token.token_secret,
+                                                       gdata.gauth.ACCESS_TOKEN, next=None, verifier=None)
+
+    def get_all_resources(self):
+        return self.client.GetResourceFeed()

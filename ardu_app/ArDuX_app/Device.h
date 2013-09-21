@@ -1,10 +1,10 @@
 #ifndef __DEVICE_H__
 #define __DEVICE_H__
 
-#define HTTP_CLIENT_DEFAULT_TIMEOUT         30000  // 3s
+#define HTTP_CLIENT_DEFAULT_TIMEOUT         3000  // 3s
 
 //Local Host
-#define HOST "http://192.168.1.132:8080/device/"
+#define HOST "http://www-ardux.appspot.com/device/"
 //Production Host
 //#define HOST "http://192.168.1.120:8080/_ah/api/devices/v1/device/"
 
@@ -26,7 +26,17 @@ class Device {
         char name[50];
         boolean has_resource; 
     } configuration;
-
+    
+    struct memory_tag
+    {
+        char type[10];
+        char user_email[50];
+        char action[10];
+        
+    } nfc_tag;
+    
+    boolean read_nfc;
+    
   private:
  
     WiFly* wifly;
