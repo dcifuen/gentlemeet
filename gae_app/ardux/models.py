@@ -1,24 +1,33 @@
 from google.appengine.ext import ndb
 from endpoints_proto_datastore.ndb.model import EndpointsModel
+from settings import get_setting
+import re
+from google.appengine.api.datastore_errors import BadValueError
 
+def validate_email(property, value):
+    if value is None:
+        return value
+    elif not re.match(get_setting('EMAIL_REGEXP'), value):
+        raise BadValueError
+    return value.lower()
 
 class Client(ndb.Model):
     """Container of the general settings and the authorization stuff"""
     credentials = ndb.TextProperty(indexed=False)
     customer_id = ndb.StringProperty(indexed=False)
     refresh_token = ndb.StringProperty(indexed=False)
-    installer_user = ndb.EmailProperty(indexed=False)
+    installer_user = ndb.StringProperty(indexed=False, validator=validate_email)
 
 
 class User(ndb.Model):
     """Both admins and event participants are users of the system"""
     is_admin = ndb.BooleanProperty(default=False, indexed=False)
-    email = ndb.EmailProperty(required=True, indexed=False)
+    email = ndb.StringProperty(required=True, indexed=False)
     #The properties below are useful for Google+ interaction
     google_user_id = ndb.StringProperty(indexed=False)
     google_display_name = ndb.StringProperty(indexed=False)
-    google_public_profile_url = ndb.LinkProperty(indexed=False)
-    google_public_profile_photo_url = ndb.LinkProperty(indexed=False)
+    google_public_profile_url = ndb.StringProperty(indexed=False)
+    google_public_profile_photo_url = ndb.StringProperty(indexed=False)
     google_credentials = ndb.TextProperty(indexed=False)
 
 
@@ -66,10 +75,10 @@ class ResourceEvent(EndpointsModel):
     and sync purposes. All day or recurrent events are not supported
     """
     id = ndb.StringProperty(required=True, indexed=False)
-    organizer = ndb.EmailProperty(indexed=False)
+    organizer = ndb.StringProperty(indexed=False)
     start_date_time = ndb.DateTimeProperty(indexed=False)
     end_date_time = ndb.DateTimeProperty(indexed=False)
-    attendees = ndb.EmailProperty(repeated=True, indexed=False)
+    attendees = ndb.StringProperty(repeated=True, indexed=False)
     resource = ndb.KeyProperty(ResourceCalendar, indexed=False)
 
 
@@ -84,7 +93,7 @@ class CheckIO(EndpointsModel):
         TYPE_OUT,
     ]
 
-    attendee = ndb.EmailProperty(indexed=False)
+    attendee = ndb.StringProperty(indexed=False)
     date_time = ndb.DateTimeProperty(required=True, auto_now_add=True,
                                      indexed=False)
     type = ndb.StringProperty(choices=TYPE_CHOICES, required=True,

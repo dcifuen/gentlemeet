@@ -7,12 +7,14 @@ from jinja2 import contextfunction
 from flask.ext.admin.babel import gettext
 
 from flask.ext.admin.base import BaseView, expose
+from flask.ext.admin.form import BaseForm
 from flask.ext.admin.model import filters, typefmt
 from flask.ext.admin.actions import ActionsMixin
 from flask.ext.admin.helpers import get_form_data, validate_form_on_submit
 from flask.ext.admin.tools import rec_getattr
 from flask.ext.admin._backwards import ObsoleteAttr
 from flask.ext.admin._compat import iteritems, as_unicode
+from .helpers import prettify_name
 
 
 class BaseModelView(BaseView, ActionsMixin):
@@ -246,14 +248,32 @@ class BaseModelView(BaseView, ActionsMixin):
     form = None
     """
         Form class. Override if you want to use custom form for your model.
+        Will completely disable form scaffolding functionality.
 
         For example::
 
             class MyForm(Form):
-                pass
+                name = TextField('Name')
 
             class MyModelView(BaseModelView):
                 form = MyForm
+    """
+
+    form_base_class = BaseForm
+    """
+        Base form class. Will be used by form scaffolding function when creating model form.
+
+        Useful if you want to have custom contructor or override some fields.
+
+        Example::
+
+            class MyBaseForm(Form):
+                def do_something(self):
+                    pass
+
+            class MyModelView(BaseModelView):
+                form_base_class = MyBaseForm
+
     """
 
     form_args = None
@@ -376,11 +396,14 @@ class BaseModelView(BaseView, ActionsMixin):
                 'userview'
             :param url:
                 Base URL. If not provided, will use endpoint as a URL.
+            :param debug:
+                Enable debugging mode. Won't catch exceptions on model
+                save failures.
         """
 
         # If name not provided, it is model name
         if name is None:
-            name = '%s' % self._prettify_name(model.__name__)
+            name = '%s' % self.prettify_name(model.__name__)
 
         # If endpoint not provided, it is model name + 'view'
         if endpoint is None:
@@ -818,7 +841,7 @@ class BaseModelView(BaseView, ActionsMixin):
             :param name:
                 Name to prettify
         """
-        return name.replace('_', ' ').title()
+        return prettify_name(name)
 
     # URL generation helper
     def _get_extra_args(self):

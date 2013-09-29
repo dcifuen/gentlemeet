@@ -6,6 +6,7 @@ from flask.ext.admin.form import Select2Field
 from flask.ext.admin.model.form import (converts, ModelConverterBase,
                                         InlineFormAdmin, InlineModelConverterBase,
                                         FieldPlaceholder)
+from flask.ext.admin.model.helpers import prettify_name
 from flask.ext.admin._backwards import get_property
 from flask.ext.admin._compat import iteritems
 
@@ -45,13 +46,20 @@ class AdminModelConverter(ModelConverterBase):
         if column_labels:
             return column_labels.get(name)
 
-        return self.view.prettify_name(name)
+        prettify_override = getattr(self.view, 'prettify_name', None)
+        if prettify_override:
+            return prettify_override(name)
+
+        return prettify_name(name)
 
     def _get_description(self, name, field_args):
         if 'description' in field_args:
             return field_args['description']
-        if self.view.column_descriptions:
-            return self.view.column_descriptions.get(name)
+
+        column_descriptions = getattr(self.view, 'column_descriptions', None)
+
+        if column_descriptions:
+            return column_descriptions.get(name)
 
     def _get_field_override(self, name):
         form_overrides = getattr(self.view, 'form_overrides', None)
@@ -60,6 +68,48 @@ class AdminModelConverter(ModelConverterBase):
             return form_overrides.get(name)
 
         return None
+
+    def _convert_relation(self, prop, kwargs):
+        remote_model = prop.mapper.class_
+        local_column = prop.local_remote_pairs[0][0]
+
+        kwargs['label'] = self._get_label(prop.key, kwargs)
+        kwargs['description'] = self._get_description(prop.key, kwargs)
+
+        if local_column.nullable:
+            kwargs['validators'].append(validators.Optional())
+        elif prop.direction.name != 'MANYTOMANY':
+            kwargs['validators'].append(validators.InputRequired())
+
+        # Contribute model-related parameters
+        if 'allow_blank' not in kwargs:
+            kwargs['allow_blank'] = local_column.nullable
+        if 'query_factory' not in kwargs:
+            kwargs['query_factory'] = lambda: self.session.query(remote_model)
+
+        if 'widget' not in kwargs:
+            if prop.direction.name == 'MANYTOONE':
+                kwargs['widget'] = form.Select2Widget()
+            elif prop.direction.name == 'ONETOMANY':
+                kwargs['widget'] = form.Select2Widget(multiple=True)
+            elif prop.direction.name == 'MANYTOMANY':
+                kwargs['widget'] = form.Select2Widget(multiple=True)
+
+        # Override field type if necessary
+        override = self._get_field_override(prop.key)
+        if override:
+            return override(**kwargs)
+
+        if prop.direction.name == 'MANYTOONE':
+            return QuerySelectField(**kwargs)
+        elif prop.direction.name == 'ONETOMANY':
+            # Skip backrefs
+            if not local_column.foreign_keys and getattr(self.view, 'column_hide_backrefs', False):
+                return None
+
+            return QuerySelectMultipleField(**kwargs)
+        elif prop.direction.name == 'MANYTOMANY':
+            return QuerySelectMultipleField(**kwargs)
 
     def convert(self, model, mapper, prop, field_args, hidden_pk):
         # Properly handle forced fields
@@ -76,43 +126,7 @@ class AdminModelConverter(ModelConverterBase):
 
         # Check if it is relation or property
         if hasattr(prop, 'direction'):
-            remote_model = prop.mapper.class_
-            local_column = prop.local_remote_pairs[0][0]
-
-            kwargs['label'] = self._get_label(prop.key, kwargs)
-            kwargs['description'] = self._get_description(prop.key, kwargs)
-
-            if local_column.nullable:
-                kwargs['validators'].append(validators.Optional())
-            elif prop.direction.name != 'MANYTOMANY':
-                kwargs['validators'].append(validators.InputRequired())
-
-            # Override field type if necessary
-            override = self._get_field_override(prop.key)
-            if override:
-                return override(**kwargs)
-
-            # Contribute model-related parameters
-            if 'allow_blank' not in kwargs:
-                kwargs['allow_blank'] = local_column.nullable
-            if 'query_factory' not in kwargs:
-                kwargs['query_factory'] = lambda: self.session.query(remote_model)
-
-            if prop.direction.name == 'MANYTOONE':
-                return QuerySelectField(widget=form.Select2Widget(),
-                                        **kwargs)
-            elif prop.direction.name == 'ONETOMANY':
-                # Skip backrefs
-                if not local_column.foreign_keys and getattr(self.view, 'column_hide_backrefs', False):
-                    return None
-
-                return QuerySelectMultipleField(
-                                widget=form.Select2Widget(multiple=True),
-                                **kwargs)
-            elif prop.direction.name == 'MANYTOMANY':
-                return QuerySelectMultipleField(
-                                widget=form.Select2Widget(multiple=True),
-                                **kwargs)
+            return self._convert_relation(prop, kwargs)
         else:
             # Ignore pk/fk
             if hasattr(prop, 'columns'):
@@ -194,8 +208,10 @@ class AdminModelConverter(ModelConverterBase):
                     return override(**kwargs)
 
                 # Check choices
-                if mapper.class_ == self.view.model and self.view.form_choices:
-                    choices = self.view.form_choices.get(column.key)
+                form_choices = getattr(self.view, 'form_choices', None)
+
+                if mapper.class_ == self.view.model and form_choices:
+                    choices = form_choices.get(column.key)
                     if choices:
                         return Select2Field(
                             choices=choices,
@@ -210,7 +226,7 @@ class AdminModelConverter(ModelConverterBase):
                     return None
 
                 return converter(model=model, mapper=mapper, prop=prop,
-                                column=column, field_args=kwargs)
+                                 column=column, field_args=kwargs)
 
         return None
 
@@ -223,13 +239,14 @@ class AdminModelConverter(ModelConverterBase):
     def conv_String(self, column, field_args, **extra):
         if hasattr(column.type, 'enums'):
             field_args['validators'].append(validators.AnyOf(column.type.enums))
-            field_args['choices'] = [(f,f) for f in column.type.enums]
+            field_args['choices'] = [(f, f) for f in column.type.enums]
             return form.Select2Field(**field_args)
+
         self._string_common(column=column, field_args=field_args, **extra)
         return fields.TextField(**field_args)
 
     @converts('Text', 'UnicodeText',
-            'sqlalchemy.types.LargeBinary', 'sqlalchemy.types.Binary')
+              'sqlalchemy.types.LargeBinary', 'sqlalchemy.types.Binary')
     def conv_Text(self, field_args, **extra):
         self._string_common(field_args=field_args, **extra)
         return fields.TextAreaField(**field_args)
@@ -406,9 +423,21 @@ class InlineModelConverter(InlineModelConverterBase):
         you can create your own wtforms field and use it instead
     """
 
-    def __init__(self, session, view):
+    def __init__(self, session, view, model_converter):
+        """
+            Constructor.
+
+            :param session:
+                SQLAlchemy session
+            :param view:
+                Flask-Admin view object
+            :param model_converter:
+                Model converter class. Will be automatically instantiated with
+                appropriate `InlineFormAdmin` instance.
+        """
         super(InlineModelConverter, self).__init__(view)
         self.session = session
+        self.model_converter = model_converter
 
     def get_info(self, p):
         info = super(InlineModelConverter, self).get_info(p)
@@ -434,7 +463,7 @@ class InlineModelConverter(InlineModelConverterBase):
 
         return info
 
-    def contribute(self, converter, model, form_class, inline_model):
+    def contribute(self, model, form_class, inline_model):
         """
             Generate form fields for inline forms and contribute them to
             the `form_class`
@@ -493,6 +522,9 @@ class InlineModelConverter(InlineModelConverterBase):
             exclude = ignore + list(info.form_excluded_columns)
         else:
             exclude = ignore
+
+        # Create converter
+        converter = self.model_converter(self.session, info)
 
         # Create form
         child_form = info.get_form()
