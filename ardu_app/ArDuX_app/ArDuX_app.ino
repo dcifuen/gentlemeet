@@ -29,8 +29,8 @@
 #define WAITING_TICKS 60 //Multiply this with 1 second to find the time
 //#define  RESET_CONF_ON_START 1
 
-#define SSID      "fore-net"
-#define KEY       "acr0bat12"
+#define SSID      "Apto"
+#define KEY       "12138026"
 // WIFLY_AUTH_OPEN / WIFLY_AUTH_WPA1 / WIFLY_AUTH_WPA1_2 / WIFLY_AUTH_WPA2_PSK
 #define AUTH      WIFLY_AUTH_WPA2_PSK
 
