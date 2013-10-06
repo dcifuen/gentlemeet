@@ -513,6 +513,7 @@ class ModelView(BaseModelView):
         """
         converter = self.model_form_converter(self.session, self)
         form_class = form.get_form(self.model, converter,
+                                   base_class=self.form_base_class,
                                    only=self.form_columns,
                                    exclude=self.form_excluded_columns,
                                    field_args=self.form_args,
@@ -530,12 +531,12 @@ class ModelView(BaseModelView):
             :param form_class:
                 Form class
         """
-        converter = self.model_form_converter(self.session, self)
-        inline_converter = self.inline_model_form_converter(self.session, self)
+        inline_converter = self.inline_model_form_converter(self.session,
+                                                            self,
+                                                            self.model_form_converter)
 
         for m in self.inline_models:
-            form_class = inline_converter.contribute(converter,
-                                                     self.model,
+            form_class = inline_converter.contribute(self.model,
                                                      form_class,
                                                      m)
 
@@ -767,6 +768,9 @@ class ModelView(BaseModelView):
             self._on_model_change(form, model, True)
             self.session.commit()
         except Exception as ex:
+            if self._debug:
+                raise
+
             flash(gettext('Failed to create model. %(error)s', error=str(ex)), 'error')
             logging.exception('Failed to create model')
             self.session.rollback()
@@ -790,9 +794,13 @@ class ModelView(BaseModelView):
             self._on_model_change(form, model, False)
             self.session.commit()
         except Exception as ex:
+            if self._debug:
+                raise
+
             flash(gettext('Failed to update model. %(error)s', error=str(ex)), 'error')
             logging.exception('Failed to update model')
             self.session.rollback()
+
             return False
         else:
             self.after_model_change(form, model, False)
@@ -813,6 +821,9 @@ class ModelView(BaseModelView):
             self.session.commit()
             return True
         except Exception as ex:
+            if self._debug:
+                raise
+
             flash(gettext('Failed to delete model. %(error)s', error=str(ex)), 'error')
             logging.exception('Failed to delete model')
             self.session.rollback()
@@ -851,4 +862,7 @@ class ModelView(BaseModelView):
                            count,
                            count=count))
         except Exception as ex:
+            if self._debug:
+                raise
+
             flash(gettext('Failed to delete models. %(error)s', error=str(ex)), 'error')

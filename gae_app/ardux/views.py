@@ -1,22 +1,33 @@
+#-*- coding: utf-8 -*-
+# vim: set fileencoding=utf-8
+import logging
+from google.appengine.ext import deferred
+from google.appengine.api import users
+
+from flask import current_app as app, abort
+from flask import redirect, g
+from flask.helpers import url_for
+from flask.templating import render_template
+from models import  User
+from settings import get_setting
+from ardux.models import ResourceDevice
 import random
 import string
-from ardux.models import ResourceDevice
 import flask
-from main import app
-import os
-import sys
-from google.appengine.ext import ndb
 
-# Flask views
+
 @app.route('/')
 def index():
-    return '<a href="/admin/">Click me to get to Admin!</a>'
-
+    user = users.get_current_user()
+    if user:
+        return redirect(url_for('admin.index'))
+    #Force user to login then admin
+    return redirect(users.create_login_url(url_for('admin.index')))
 
 @app.route('/_ah/warmup')
 def warmup():
-    sys.path.insert(1, os.path.join(os.path.abspath('.'), 'lib'))
-    return 'Warming Up'
+    #TODO: Warmup
+    return 'Warming Up...'
 
 
 @app.route('/device/register', methods=['POST'])
@@ -33,3 +44,27 @@ def device_sync(uuid):
         return flask.jsonify(device.to_dict())
     else:
         return 'Device not found', 404
+
+
+@app.before_request
+def before_request():
+    if users.get_current_user():
+        g.url_logout_text = 'Logout'
+        g.url_logout = users.create_logout_url(url_for('admin.index'))
+    else:
+        g.url_logout_text = 'Login'
+        g.url_logout = users.create_login_url(url_for('admin.index'))
+
+@app.errorhandler(403)
+def page_unauthorized(e):
+    return render_template('403.html'), 403
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def page_error(e):
+    logging.error('500 error %s', e)
+    return render_template('500.html'), 500
+

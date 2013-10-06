@@ -1,11 +1,12 @@
-"""
-App Engine config
+# -*- coding: utf-8 -*-
 
-"""
-
-
-def gae_mini_profiler_should_profile_production():
-    """Uncomment the first two lines to enable GAE Mini Profiler on production for admin accounts"""
-    # from google.appengine.api import users
-    # return users.is_current_user_admin()
-    return False
+def namespace_manager_default_namespace_for_request():
+    """
+    Handles the namespace resolution based on the environment. This let us
+    test without touching production data while we are in staging
+    :return: staging if it is the current environment None otherwise
+    """
+    from settings import get_environment, Config
+    environment = get_environment()
+    namespace = 'staging' if environment == Config.ENV_STAGING else None
+    return namespace

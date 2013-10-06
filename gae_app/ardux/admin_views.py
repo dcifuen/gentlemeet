@@ -1,113 +1,110 @@
 from google.appengine.api import users
-from google.appengine.ext import ndb
-from ardux.helpers import OAuthHelper
-from flask.ext.admin import BaseView, expose
-from flask.ext.admin.base import AdminIndexView
-from settings import API_KEY, OAUTH_SCOPE, CONSUMER_SECRET
-from werkzeug.routing import RequestRedirect
-from flask import helpers
 from ardux.models import Client, User
-from flask import redirect, request
-from gdata.docs.client import DocsClient
-from gdata.gauth import AuthorizeRequestToken, AeSave, AeLoad
+from ardux.helpers import OAuthDanceHelper
+from flask.ext.admin import BaseView, expose
+from flask.ext.admin.base import AdminIndexView, expose_plugview
+from werkzeug.routing import RequestRedirect
 import logging
+from flask import abort, redirect, helpers, request
+from settings import get_setting
 
-REQUEST_TOKEN = 'RequestToken'
-ACCESS_TOKEN = 'AccessToken'
 
 class AuthView(BaseView):
     def is_accessible(self):
+        """
+        By default check that the user is authenticated against GAE, has the
+        is staff flag and belongs to the Eforcers team or a valid test domain
+        :return: True if is a
+        """
         user = users.get_current_user()
         if user:
-            db_user = User.get_by_id(user.email())
-            return db_user.is_admin
-        else:
-            raise RequestRedirect(users.create_login_url(self.url))
+            return True
+        #Force user to login
+        raise RequestRedirect(users.create_login_url(self.url))
 
-class AdminIndex(AuthView,AdminIndexView):
+class AdminIndex(AuthView, AdminIndexView):
     @expose('/')
     def index(self):
         return self.render('admin_index.html')
 
-class Devices(AuthView):
-    @expose('/')
-    def index(self):
-        return self.render('admin_devices.html')
-
-
 class OAuthView(AuthView):
 
-    client = DocsClient(source='ArDuX')
+    def is_accessible(self):
+        """
+        Check that the user is an app engine admin to configure this
+        :return: True if the user is admin, raise redirect otherwise
+        """
+        if users.is_current_user_admin():
+            return True
+        abort(403)
 
     @expose('/')
-    def start_oauth2(self):
-        redirect_uri = helpers.url_for('oauth.callback_oauth2', _external = True)
-        domain = users.get_current_user().email().split('@')[1]
-        client = Client.get_by_id(domain)
-        if client:
-            if client.refresh_token is None:
-                oauthHelper = OAuthHelper(redirect_uri, approval_prompt = 'force')
-            else:
-                oauthHelper = OAuthHelper(redirect_uri)
-        else:
-            client = Client(id = domain)
-            client.installer_user = users.get_current_user().email()
+    def index(self):
+        #FIXME: Common, use a template
+        return '<a href="%s?type=reseller">Click me to authorize ' \
+               'as ' \
+               'reseller</a><br/><a href="%s?type=target">Click me to ' \
+               'authorize as ' \
+               'target domain</a>' % (helpers.url_for('oauth'
+                                                      '.start_oauth2_dance'), helpers.url_for('oauth.start_oauth2_dance'))
+
+    @expose('/start/')
+    def start_oauth2_dance(self):
+        login_hint = ''
+        scope = ''
+        type = request.args.get('type', None)
+        client = Client.get_by_id(1)
+        if not client:
+            #If client does not exist then create an empty one
+            client = Client(id = 1)
             client.put()
-            oauthHelper = OAuthHelper(redirect_uri)
-
-        url = oauthHelper.step1_get_authorize_url()
-
-        return redirect("%s&state=%s" % (url, domain))
+        #Get the login hint from configuration
+        if type == 'reseller':
+            approval_prompt = 'auto' if client.reseller_refresh_token else 'force'
+            login_hint = get_setting('OAUTH2_RESELLER_DOMAIN_USER')
+            scope = get_setting('OAUTH2_RESELLER_SCOPE')
+        elif type == 'target':
+            approval_prompt = 'auto' if client.target_refresh_token else 'force'
+            login_hint = get_setting('OAUTH2_DOMAIN_USER')
+            scope = get_setting('OAUTH2_DOMAIN_SCOPE')
+        else:
+            logging.warn('Type of domain not supported')
+            abort(404)
+        redirect_uri = helpers.url_for('oauth.oauth_callback',
+                                        _external = True)
+        oauth_helper = OAuthDanceHelper(redirect_uri, approval_prompt, scope)
+        url = oauth_helper.step1_get_authorize_url()
+        #TODO: Add a random token to avoid forgery
+        return redirect("%s&state=%s&login_hint=%s" % (url, type, login_hint))
 
     @expose('/callback/')
-    def callback_oauth2(self):
-        redirect_uri = helpers.url_for('oauth.callback_oauth2', _external = True)
-        oauthHelper = OAuthHelper(redirect_uri)
+    def oauth_callback(self):
         code = request.args.get('code', None)
-        domain = users.get_current_user().email().split('@')[1]
         if code:
-            credentials = oauthHelper.step2_exchange(code)
-            client = Client.get_by_id(domain)
-            client.credentials = credentials.to_json()
-            if client.refresh_token is None:
-                client.refresh_token = credentials.refresh_token
-            client.put()
-
-        return redirect(helpers.url_for('oauth.start_oauth1'))
-
-    @expose('/oauth1/')
-    def start_oauth1(self):
-
-        oauth_callback_url = helpers.url_for('oauth.callback_oauth1', _external = True)
-        logging.info("oauth_callback_url [%s]", oauth_callback_url)
-
-        request_token = self.client.GetOAuthToken(OAUTH_SCOPE, oauth_callback_url, API_KEY,
-                                             consumer_secret = CONSUMER_SECRET)
-
-        domain = users.get_current_user().email().split('@')[1]
-
-        AeSave(request_token, REQUEST_TOKEN)
-
-        authorization_url = request_token.generate_authorization_url()
-        return redirect(str(authorization_url))
-
-    @expose('/oauth1/callback/')
-    def callback_oauth1(self):
-        saved_request_token = AeLoad(REQUEST_TOKEN)
-        request_token = AuthorizeRequestToken(saved_request_token, request.url)
-        access_token = self.client.GetAccessToken(request_token)
-        AeSave(access_token, ACCESS_TOKEN)
-        return self.render('admin_after_auth.html')
-
-    def is_accessible(self):
-        user = users.get_current_user()
-        if user:
-            domain = users.get_current_user().email().split('@')[1]
-            client = Client.get_by_id(domain)
+            type = request.args.get('state', None)
+            redirect_uri = helpers.url_for('oauth.oauth_callback', _external = True)
+            oauth_helper = OAuthDanceHelper(redirect_uri)
+            credentials = oauth_helper.step2_exchange(code)
+            client = Client.get_by_id(1)
             if client:
-                db_user = User.get_by_id(user.email())
-                return user.email() == client.installer_user
+                if type == 'reseller':
+                    client.reseller_credentials = credentials.to_json()
+                    if credentials.refresh_token:
+                        client.reseller_refresh_token = credentials.refresh_token
+                    client.put()
+                    return redirect(helpers.url_for('oauth.index'))
+                elif type == 'target':
+                    client.target_credentials = credentials.to_json()
+                    if credentials.refresh_token:
+                        client.target_refresh_token = credentials.refresh_token
+                    client.put()
+                    return redirect(helpers.url_for('oauth.index'))
+                else:
+                    logging.warn('Type of domain not supported')
+                    abort(404)
             else:
-                return True
+                logging.error('No client object, aborting authorization')
+                abort(500)
         else:
-            raise RequestRedirect(users.create_login_url(self.url))
+            logging.error('No code, no authorization')
+            abort(500)
