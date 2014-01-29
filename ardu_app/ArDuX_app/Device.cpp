@@ -3,7 +3,7 @@
 #include "HTTPClient.h"
 #include "HTTPResponse.h"
 #include "aJSON.h"
-#include "EEPROMStruct.h"
+#include "MemoryStruct.h"
 
 Device::Device()
 {
@@ -62,5 +62,15 @@ int Device::sync_device(){
      return 0; 
   }
 }
+
+int Device::test_tcp(){
+  DBG("Connecting to remote server... \r\n");
+  while(!wifly->connect("162.222.182.19", 6543, 10));
+  DBG("Connected to remote server \r\n");
+  wifly->send("Hola Server", 10);
+  return 0;
+
+}
+
 
 

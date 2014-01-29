@@ -4,6 +4,7 @@
 #include "TimerOne.h"
 #include <SoftwareSerial.h>
 #include <WiFly.h>
+#include "MemoryStruct.h"
 #include "Device.h"
 #include <HttpClient.h>
 #include "HTTPResponse.h"
@@ -26,11 +27,11 @@
 #define MISO (40)
 
 
-#define WAITING_TICKS 60 //Multiply this with 1 second to find the time
+#define WAITING_TICKS 20 //Multiply this with 1 second to find the time
 //#define  RESET_CONF_ON_START 1
 
-#define SSID      "Apto"
-#define KEY       "12138026"
+#define SSID     "Apto"
+#define KEY      "12138026"
 // WIFLY_AUTH_OPEN / WIFLY_AUTH_WPA1 / WIFLY_AUTH_WPA1_2 / WIFLY_AUTH_WPA2_PSK
 #define AUTH      WIFLY_AUTH_WPA2_PSK
 
@@ -53,15 +54,22 @@ TM1637 tm1637(CLK,DIO);
 
 Adafruit_PN532 nfc(SCK, MISO, MOSI, SS);
 
-
-
 void setup()
 {
-  
+  #ifdef RESET_CONF_ON_START
+      device.clear();
+      wifly.reset(); 
+  #endif
   #ifdef DEBUG
       Serial.begin(9600);
       DBG("************ ArDuX *************\r\n");
   #endif
+  
+  if (strlen(device.configuration.uuid) > 0){
+     DBG("Device UID " + String(device.configuration.uuid) + "\r\n");
+     DBG("Device Name " + String(device.configuration.name) + "\r\n");
+     DBG("Has resource? " + String(device.configuration.has_resource ? "Yes" : "No") + "\r\n");
+  }
   
   // assign default color value
   if ( u8g.getMode() == U8G_MODE_R3G3B2 ) {
@@ -87,18 +95,28 @@ void setup()
   
   nfc.SAMConfig();
  
-  #ifdef RESET_CONF_ON_START
-      device.clear();
-      wifly.reset(); 
-  #endif
+
+  char ssid[50];
+  char pass[50];
+  int auth = AUTH;
+  
+  strcpy(ssid, SSID);
+  strcpy(pass, KEY);
+
+  if(strlen(device.configuration.ssid) > 0){
+    strcpy(ssid, device.configuration.ssid);
+    strcpy(pass, device.configuration.pass);
+    auth = device.configuration.auth;
+  }
+  
   while (1) {
-    DBG("Try to join " + String(SSID)  + "\r\n");
-    if (wifly.join(SSID, KEY, AUTH)) {
-      DBG("Succeed joining " + String(SSID) + "\r\n");
+    DBG("Try to join " + String(ssid)  + "\r\n");
+    if (wifly.join(ssid, pass, auth)) {
+      DBG("Succeed joining " + String(ssid) + "\r\n");
       wifly.clear();
       break;
     } else {
-      DBG("Failed to join " + String(SSID) +"\r\n");
+      DBG("Failed to join " + String(ssid) +"\r\n");
       DBG("Wait 1 second and try again...\r\n");
       delay(1000);
     }
@@ -107,12 +125,6 @@ void setup()
   wifly.enableRTC();
   time = wifly.getTime();
   setTime(time);
-  
-  if (strlen(device.configuration.uuid) > 0){
-     DBG("Device UID " + String(device.configuration.uuid) + "\r\n");
-     DBG("Device Name " + String(device.configuration.name) + "\r\n");
-     DBG("Has resource? " + String(device.configuration.has_resource ? "Yes" : "No") + "\r\n");
-  }
   
   
   //Init timer interrupt every second
@@ -123,10 +135,13 @@ void setup()
 }
 void loop()
 {
-  /************* NFC ************* 
-  nfc_id = nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A);
-  if (nfc_id > 0){
-    if(!nfc.writeAllMemory(nfc_id,device.nfc_tag,sizeof(device.nfc_tag)))
+  /************* NFC *************/
+  uint8_t success;                          
+  uint8_t uid[] = { 0, 0, 0, 0, 0, 0, 0 }; 
+  uint8_t uidLength;                      
+  success = nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength);
+  if (success){
+    if(!NFCTAG_writeStruct(nfc, sizeof(device.configuration), device.configuration))
          DBG("Error Writing Tag \r\n");
       else
       {
@@ -134,7 +149,7 @@ void loop()
          DBG("Tag Writed \r\n");
       }
   }
-  */
+  
     
   //******** SYNC ************
   if(sync_flag){
@@ -187,10 +202,6 @@ void sync(){
   do {
     draw();
   } while( u8g.nextPage() );
-  
-  
-  
-  
   
   if(ClockPoint)tm1637.point(POINT_ON);
   else tm1637.point(POINT_OFF); 

@@ -42,6 +42,11 @@ with flask_app.app_context():
         url=users.create_logout_url(admin_url)
     ))
 
+    admin.add_view(admin_views.DevicesView(
+        name='Devices',
+        endpoint='devices',
+    ))
+
     admin.add_view(admin_views.OAuthView(
         name='Settings',
         endpoint='oauth',

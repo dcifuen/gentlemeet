@@ -1,4 +1,17 @@
-{% extends 'base.html' %}
-{% block body %}
-    Hello World from MyView!
+{% extends 'base_angular.html' %}
+{% block angular_content %}
+    <div ng-controller="devicesCtrl">
+        <table class="table">
+            <thead>
+                <th>Name</th>
+                <th>Online</th>
+            </thead>
+            <tbody>
+                <tr ng-repeat="device in devices">
+                    <td>[[ device.name ]]</td>
+                    <td>[[ device.online ]]</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 {% endblock %}

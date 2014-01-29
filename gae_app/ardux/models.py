@@ -1,8 +1,10 @@
 from google.appengine.ext import ndb
-from endpoints_proto_datastore.ndb.model import EndpointsModel
+from endpoints_proto_datastore.ndb.model import EndpointsModel, EndpointsAliasProperty
+from protorpc import messages
 from settings import get_setting
 import re
 from google.appengine.api.datastore_errors import BadValueError
+import datetime
 
 def validate_email(property, value):
     if value is None:
@@ -57,6 +59,12 @@ class ResourceDevice(EndpointsModel):
     uuid = ndb.StringProperty()
     type = ndb.StringProperty(choices=TYPE_CHOICES, indexed=False)
     state = ndb.StringProperty(choices=STATE_CHOICES, indexed=False)
+    last_sync = ndb.DateTimeProperty(auto_now_add=True)
+
+    @EndpointsAliasProperty(property_type=messages.BooleanField)
+    def online(self):
+        return self.last_sync >= datetime.datetime.now()-datetime.timedelta(seconds=30)
+
 
 
 class ResourceCalendar(EndpointsModel):

@@ -14,7 +14,7 @@ from ardux.models import ResourceDevice
 import random
 import string
 import flask
-
+import datetime
 
 @app.route('/')
 def index():
@@ -32,7 +32,7 @@ def warmup():
 
 @app.route('/device/register', methods=['POST'])
 def device_register():
-    device = ResourceDevice(uuid = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(5)))
+    device = ResourceDevice(uuid=''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(5)))
     device.put();
     return flask.jsonify(device.to_dict())
 
@@ -40,6 +40,8 @@ def device_register():
 @app.route('/device/sync/<uuid>')
 def device_sync(uuid):
     device = ResourceDevice.query(ResourceDevice.uuid == uuid).fetch(1)[0]
+    device.last_sync = datetime.datetime.now()
+    device.put()
     if device:
         return flask.jsonify(device.to_dict())
     else:

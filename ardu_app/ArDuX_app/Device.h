@@ -1,12 +1,12 @@
 #ifndef __DEVICE_H__
 #define __DEVICE_H__
 
-#define HTTP_CLIENT_DEFAULT_TIMEOUT         3000  // 3s
+#define HTTP_CLIENT_DEFAULT_TIMEOUT  3000  // 3s
 
-//Local Host
-#define HOST "http://www-ardux.appspot.com/device/"
 //Production Host
-//#define HOST "http://192.168.1.120:8080/_ah/api/devices/v1/device/"
+//#define HOST "http://www-ardux.appspot.com/device/"
+//Local Host
+#define HOST "http://192.168.1.108:8080/device/"
 
 #include <Arduino.h>
 #include <WiFly.h>
@@ -19,12 +19,17 @@ class Device {
     Device();
     int register_device();
     int sync_device();
+    int test_tcp();
     int clear();
     struct config_t
     {
         char uuid[50];
         char name[50];
-        boolean has_resource; 
+        char ssid[50];
+        char pass[50];
+        int auth;
+        boolean has_resource;
+        
     } configuration;
     
     struct memory_tag

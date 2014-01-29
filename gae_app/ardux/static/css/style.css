@@ -5,7 +5,7 @@ html {
 body {
     font-family: 'Open Sans', sans-serif;
     padding-top: 0px;
-    background: url('../img/back-top.png'), url('../img/back-footer.png') center bottom;
+    background: url('../img/back-top.png');
     background-repeat: repeat-x;
     margin: 0px;
     min-height: 100%;

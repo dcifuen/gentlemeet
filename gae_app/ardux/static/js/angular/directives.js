@@ -1,4 +1,4 @@
-atbt_app.directive('ngBlur', ['$parse', function($parse) {
+ardx_app.directive('ngBlur', ['$parse', function($parse) {
   return function(scope, element, attr) {
     var fn = $parse(attr['ngBlur']);
     element.bind('blur', function(event) {
@@ -9,7 +9,7 @@ atbt_app.directive('ngBlur', ['$parse', function($parse) {
   }
 }]);
 
-atbt_app.directive('uppercase', function() {
+ardx_app.directive('uppercase', function() {
    return {
      require: 'ngModel',
      link: function(scope, element, attrs, modelCtrl) {
@@ -31,7 +31,7 @@ atbt_app.directive('uppercase', function() {
    };
 });
 
-atbt_app.directive('digits', function() {
+ardx_app.directive('digits', function() {
   return {
     require: 'ngModel',
     link: function(scope, elm, attrs, ctrl) {

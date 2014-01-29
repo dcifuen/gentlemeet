@@ -1,54 +1,67 @@
-atbt_app.service('EndpointService',function($q, $rootScope, $http) {
+ardx_app.service('EndpointsService',function($q, $rootScope, $http, $window) {
 
     var service = this;
-    var http = $http;
+    service.ENDPOINTS_READY = "ENDPOINTS_READY";
+    /**
+     * build service methods from discovery document
+     * @param api
+     * @param resource
+     * @param method
+     * @returns {Function}
+     */
     var builder = function (api, resource, method){
-        return function (args,callback) {
+        return function (args, callback) {
               var deferred = $q.defer();
               gapi.client[api][resource][method](args).execute(function(resp) {
-                 $rootScope.$apply(deferred.resolve(resp));
+                  callback(resp);
+                  $rootScope.$apply(deferred.resolve(resp));
               });
-              deferred.promise.then(callback)
+
               return deferred.promise;
         };
     }
-    var loaded = false;
-    this.isLoaded = function() { return loaded; };
 
-    this.loadService = function(api, version){
+    /**
+     * brings the discovery document and adds methods in the service built from the information brought
+     * @param api
+     * @param version
+     */
+    service.loadService = function(api, version, callback){
         service.apiName = api;
         service.apiVersion = version;
-        //Check whether in production, staging or local
-        var isProduction = (window.location.host == 'www-atbt.appspot.com') || ( window.location.host == 'ardux.eforcers.com');
-        var isStaging = window.location.host.indexOf("-staging") != -1;
-        var serverURL = window.location.host;
-        if (isProduction){
-            serverURL = 'www-atbt.appspot.com';
-        } else if(isStaging){
-            serverURL = serverURL.replace('-staging.', '-staging-dot-');
-        }
-        console.log('Is in production? ['+ isProduction +'] staging? ['+isStaging+'] Server URL ['+serverURL+']');
 
-        var apiRoot = '';
-        if (isProduction || isStaging){
-            apiRoot= 'https://' + serverURL + '/_ah/api';
-        } else {
-            apiRoot= '//' + window.location.host + '/_ah/api';
+        var apiRoot = $window.app_host + '/_ah/api';
+        if(apiRoot.indexOf("localhost")>=0){
+            apiRoot = "http://"+apiRoot;
+        }else{
+            apiRoot = "https://"+apiRoot;
         }
-
+        console.log("Configuring api "+apiRoot);
         gapi.client.load(service.apiName, service.apiVersion, function() {
             var apiUrl = '';
-            http.get(apiRoot+'/discovery/v1/apis/'+service.apiName+'/'+service.apiVersion+'/rest').success( function(data) {
-                console.log(data);
+            $http.get(apiRoot+'/discovery/v1/apis/'+service.apiName+'/'+service.apiVersion+'/rest').success(function(data) {
                 for (resource in data.resources){
                     for(method in data.resources[resource].methods){
-                        service[method+resource] = builder(service.apiName,resource,  method);
-                        console.log("Method "+method+resource+" created");
+                        var capitalizedResource = resource[0].toUpperCase() + resource.substring(1);
+                        service[method+capitalizedResource] = builder(service.apiName, resource,  method);
+                        console.log("Method "+method+capitalizedResource+" created");
                     }
                 }
-                loaded = true;
+                callback();
             });
             $rootScope.$$phase || $rootScope.$apply();
         }, apiRoot);
     }
+
+    $window.api_load = function(api, version){
+        service.loadService(api, version, function(){
+            console.log("Endpoints Service Ready")
+            $rootScope.$broadcast(service.ENDPOINTS_READY);console
+        });
+    }
+
+    if($window.load_api){
+        $window.api_load($window.api, $window.version);
+    }
+
 });
