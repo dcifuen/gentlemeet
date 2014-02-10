@@ -1,3 +1,4 @@
+import logging
 from google.appengine.ext import ndb
 from endpoints_proto_datastore.ndb.model import EndpointsModel, EndpointsAliasProperty
 from protorpc import messages
@@ -39,6 +40,8 @@ class ResourceDevice(EndpointsModel):
     """The representation of the physical or web device that is at the
     calendar resource.
     """
+    _message_fields_schema = ('name', 'uuid','type','state', 'last_sync' , 'online')
+
     TYPE_PHYSICAL = 'PHYSICAL'
     TYPE_WEB = 'WEB'
     TYPE_CHOICES = [
@@ -63,7 +66,26 @@ class ResourceDevice(EndpointsModel):
 
     @EndpointsAliasProperty(property_type=messages.BooleanField)
     def online(self):
-        return self.last_sync >= datetime.datetime.now()-datetime.timedelta(seconds=30)
+        if self.last_sync:
+            return self.last_sync >= datetime.datetime.now()-datetime.timedelta(seconds=30)
+        else:
+            return False
+
+    def UuidSet(self, value):
+        device = ResourceDevice.get_by_uuid(value)
+        self.UpdateFromKey(device.key)
+
+    @EndpointsAliasProperty(setter=UuidSet)
+    def uuid_query(self):
+        return self.uuid
+
+    @staticmethod
+    def get_by_uuid(uuid):
+        devices = ResourceDevice.query(ResourceDevice.uuid == uuid).fetch()
+        if len(devices) > 0:
+            return devices[0]
+        else:
+            return None
 
 
 

@@ -30,7 +30,7 @@ def warmup():
     return 'Warming Up...'
 
 
-@app.route('/device/register', methods=['POST'])
+@app.route('/device/register', methods=['GET'])
 def device_register():
     device = ResourceDevice(uuid=''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(5)))
     device.put();

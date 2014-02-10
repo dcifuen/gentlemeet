@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
+from endpoints.api_exceptions import NotFoundException
+import logging
+
 sys.path.insert(1, os.path.join(os.path.abspath('.'), 'lib'))
 import endpoints
 from protorpc import remote
@@ -14,18 +17,8 @@ class String(messages.Message):
 class StringList(messages.Message):
     items = messages.MessageField(String, 1, repeated=True)
 
-@endpoints.api(name='devices', version='v1', description='Eforcers ResourceDevice API')
+@endpoints.api(name='devices', version='v1', description='ResourceDevice API')
 class ResourceDeviceApi(remote.Service):
-
-    @ResourceDevice.method(path='device/register',
-                        http_method='POST',
-                        name='device.register')
-    def ResourceDeviceRegister(self, device):
-        if device.uuid is None:
-            device.uuid = str(uuid.uuid1())
-        #device.put()
-        return device
-
 
     @ResourceDevice.method(path='device',
                         http_method='POST',
@@ -33,6 +26,21 @@ class ResourceDeviceApi(remote.Service):
     def ResourceDeviceInsert(self, device):
         if device.uuid is None:
             device.uuid = str(uuid.uuid1())
+        device.put()
+        return device
+
+    @ResourceDevice.method(path='device/{uuid_query}',
+                        http_method='GET',
+                        name='device.get')
+    def ResourceDeviceGet(self, device):
+        logging.info(device.to_dict())
+        return device
+
+    @ResourceDevice.method(path='device/{uuid_query}',
+                        http_method='PUT',
+                        request_fields=('name',),
+                        name='device.update')
+    def ResourceDeviceUpdate(self, device):
         device.put()
         return device
 
