@@ -1,0 +1,4 @@
+cron:
+- description: daily resources sync
+  url: /cron/sync/resources
+  schedule: every 24 hours

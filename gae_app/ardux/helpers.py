@@ -60,7 +60,7 @@ class CalendarResourceHelper(OAuthServiceHelper):
         self.client = auth2token.authorize(self.client)
 
     def get_all_resources(self):
-        return self.client.GetResourceFeed()
+        return self.client.GetResourceFeed().entry
 
 class CalendarHelper(OAuthServiceHelper):
     """ Google Calendar API helper class"""
@@ -140,14 +140,14 @@ class CalendarHelper(OAuthServiceHelper):
         return self.service.events().get(calendarId=calendar_id,
                                          eventId=even_id).execute()
 
-    def retrieve_all_events(self, calendar_id):
+    def list_events(self, calendar_id, **kwargs):
         events = []
         page_token = None
         while True:
             if page_token:
-                tem_events = self.service.events().list(calendarId=calendar_id, pageToken=page_token).execute()
+                tem_events = self.service.events().list(calendarId=calendar_id, pageToken=page_token, **kwargs).execute()
             else:
-                tem_events = self.service.events().list(calendarId=calendar_id).execute()
+                tem_events = self.service.events().list(calendarId=calendar_id, **kwargs).execute()
             events.extend(tem_events['items'])
             page_token = tem_events.get('nextPageToken')
             if not page_token:

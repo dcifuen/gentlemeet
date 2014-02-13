@@ -3,6 +3,7 @@
 import logging
 from google.appengine.ext import deferred
 from google.appengine.api import users
+from ardux.tasks import sync_resources
 
 from flask import current_app as app, abort
 from flask import redirect, g
@@ -46,6 +47,13 @@ def device_sync(uuid):
         return flask.jsonify(device.to_dict())
     else:
         return 'Device not found', 404
+
+
+@app.route('/cron/sync/resources')
+def resources_sync():
+    logging.info("Scheduling sync task")
+    deferred.defer(sync_resources)
+    return "Scheduling sync task..."
 
 
 @app.before_request

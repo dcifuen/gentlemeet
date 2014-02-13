@@ -1,0 +1,52 @@
+{% extends 'base_angular.html' %}
+
+{% block angular_content %}
+    <div ng-controller="deviceCtrl">
+        <div class="container">
+            <form>
+                <fieldset>
+                    <legend>Device [[ device.uuid ]]</legend>
+                    <span class="help-block">Last sync on: [[ device.last_sync]]</span>
+
+                    <div>
+                        <label>Name: </label>
+                        <input class="span3" type="text" ng-model="device.name" placeholder="Type the name">
+                    </div>
+                    <div>
+                        <label>Resource: </label>
+                        <select class="span3" ng-model="device.resource_id">
+                            <option ng-repeat="resource in resources" value="[[resource.id]]">[[resource.name]]</option>
+                        </select>
+                    </div>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-primary" ng-click="saveDevice()">Save</button>
+                    </div>
+                </fieldset>
+            </form>
+            <table class="table">
+                <legend>Events</legend>
+                <thead>
+                <th>Summary</th>
+                <th>Start date</th>
+                <th>End date</th>
+                </thead>
+                <tbody>
+                <tr ng-repeat="event in events">
+                    <td> [[ event.summary ]]</td>
+                    <td>[[ event.start_date_time ]]</td>
+                    <td>[[ event.end_date_time ]]</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+{% endblock %}
+
+{% block tail_js %}
+    <script type="application/javascript">
+        window.device_uuid = '{{ device.uuid }}';
+    </script>
+    {{ super() }}
+    <script type="text/javascript" src="/static/js/angular/controllers/deviceCtrl.js"></script>
+{% endblock %}

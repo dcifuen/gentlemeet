@@ -1,5 +1,5 @@
 from google.appengine.api import users
-from ardux.models import Client, User
+from ardux.models import Client, User, ResourceDevice
 from ardux.helpers import OAuthDanceHelper, CalendarResourceHelper
 from flask.ext.admin import BaseView, expose
 from flask.ext.admin.base import AdminIndexView, expose_plugview
@@ -25,15 +25,20 @@ class AuthView(BaseView):
 class AdminIndex(AuthView, AdminIndexView):
     @expose('/')
     def index(self):
-        client = Client.get_by_id(1)
-        helper = CalendarResourceHelper(client.credentials, client.refresh_token, 'eforcers.com.co')
-        logging.info(helper.get_all_resources())
         return self.render('admin_index.html')
 
 class DevicesView(BaseView):
     @expose('/')
     def index(self):
         return self.render('admin_devices.html')
+
+    @expose('/device/<uuid>')
+    def device_edit(self, uuid):
+        device = ResourceDevice.get_by_uuid(uuid)
+        if device:
+            return self.render('admin_device.html', device=device)
+        else:
+            abort(404)
 
 
 class OAuthView(AuthView):
@@ -43,9 +48,11 @@ class OAuthView(AuthView):
         Check that the user is an app engine admin to configure this
         :return: True if the user is admin, raise redirect otherwise
         """
-        if users.is_current_user_admin():
+
+        if users.get_current_user():
             return True
-        abort(403)
+        else:
+            redirect(users.create_login_url(request.full_path))
 
     @expose('/')
     def index(self):
@@ -59,7 +66,8 @@ class OAuthView(AuthView):
         client = Client.get_by_id(1)
         if not client:
             #If client does not exist then create an empty one
-            client = Client(id = 1)
+            client = Client(id=1)
+            client.installer_user = users.get_current_user().email()
             client.put()
         #Get the login hint from configuration
         approval_prompt = 'auto' if client.refresh_token else 'force'

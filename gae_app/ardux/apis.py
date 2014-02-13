@@ -9,7 +9,8 @@ import endpoints
 from protorpc import remote
 from protorpc import messages
 import uuid
-from ardux.models import ResourceDevice
+from ardux.models import ResourceDevice, ResourceCalendar, ResourceEvent
+
 
 class String(messages.Message):
     value = messages.StringField(1)
@@ -38,7 +39,7 @@ class ResourceDeviceApi(remote.Service):
 
     @ResourceDevice.method(path='device/{uuid_query}',
                         http_method='PUT',
-                        request_fields=('name',),
+                        request_fields=('name', 'resource_id'),
                         name='device.update')
     def ResourceDeviceUpdate(self, device):
         device.put()
@@ -48,4 +49,16 @@ class ResourceDeviceApi(remote.Service):
                           path='devices',
                           name='devices.list')
     def ResourceDeviceList(self, query):
+        return query
+
+    @ResourceCalendar.query_method(query_fields=('limit', 'order', 'pageToken'),
+                          path='resources',
+                          name='resources.list')
+    def CalendarResourceList(self, query):
+        return query
+
+    @ResourceEvent.query_method(query_fields=('limit', 'order', 'pageToken', 'resource_id'),
+                          path='events',
+                          name='events.list')
+    def CalendarEventList(self, query):
         return query
