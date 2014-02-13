@@ -71,5 +71,8 @@ dependencies {
     }
     // This is used by the Google HTTP client library.
     compile(group: 'com.google.guava', name: 'guava', version: '14.0.+')
+    compile 'com.google.http-client:google-http-client-gson:1.17.0-rc'
+
     compile fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
+
 }

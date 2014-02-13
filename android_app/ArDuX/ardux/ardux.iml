@@ -76,8 +76,10 @@
     <orderEntry type="library" exported="" name="google-http-client-1.17.0-rc" level="project" />
     <orderEntry type="library" exported="" name="google-http-client-android-1.17.0-rc" level="project" />
     <orderEntry type="library" exported="" name="google-api-client-android-1.17.0-rc" level="project" />
+    <orderEntry type="library" exported="" name="google-http-client-gson-1.17.0-rc" level="project" />
     <orderEntry type="library" exported="" name="guava-14.0.1" level="project" />
     <orderEntry type="library" exported="" name="google-api-client-1.17.0-rc" level="project" />
+    <orderEntry type="library" exported="" name="gson-2.1" level="project" />
     <orderEntry type="library" exported="" name="support-v4-19.0.1" level="project" />
     <orderEntry type="library" exported="" name="play-services-4.0.30" level="project" />
   </component>

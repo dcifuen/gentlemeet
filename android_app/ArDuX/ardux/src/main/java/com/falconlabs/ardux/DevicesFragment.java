@@ -48,6 +48,8 @@ public class DevicesFragment extends Fragment {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Intent deviceActivity = new Intent(getActivity(), DeviceActivity.class);
                 deviceActivity.putExtra(AppConstants.DEVICE_UUID, ((ResourceDevice)listAdapter.getItem(i)).getUuid());
+                deviceActivity.putExtra(AppConstants.DEVICE_NAME, ((ResourceDevice)listAdapter.getItem(i)).getName());
+                deviceActivity.putExtra(AppConstants.DEVICE_LAST_SYNC, ((ResourceDevice)listAdapter.getItem(i)).getLastSync());
                 startActivity(deviceActivity);
             }
         });

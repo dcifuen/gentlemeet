@@ -6,14 +6,18 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.appspot.www_ardux.devices.Devices;
 import com.appspot.www_ardux.devices.model.ResourceDevice;
+import com.appspot.www_ardux.devices.model.ResourceDeviceProtoName;
 
 import java.io.IOException;
 import java.util.Date;
@@ -24,14 +28,36 @@ import java.util.Date;
 public class DeviceActivity extends Activity{
 
     private static final String LOG_TAG = "DeviceActivity";
+    EditText name;
+    TextView uuid;
+    TextView last_update;
+    Activity activity;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        activity = this;
         setContentView(R.layout.activity_device);
         getActionBar().setDisplayHomeAsUpEnabled(true);
-        getDevice(getIntent().getExtras().getString(AppConstants.DEVICE_UUID));
 
-        //Toast.makeText(this, , Toast.LENGTH_LONG).show();
+        name = (EditText)this.findViewById(R.id.device_edit_name);
+        uuid = (TextView)this.findViewById(R.id.device_edit_uuid);
+        last_update = (TextView)this.findViewById(R.id.device_edit_last_update);
+
+
+        if (getIntent().getExtras().getString(AppConstants.DEVICE_LAST_SYNC) == null){
+            getDevice(getIntent().getExtras().getString(AppConstants.DEVICE_UUID));
+        }else{
+            name.setText(getIntent().getExtras().getString(AppConstants.DEVICE_NAME));
+            uuid.setText(getIntent().getExtras().getString(AppConstants.DEVICE_UUID));
+            last_update.setText(getIntent().getExtras().getString(AppConstants.DEVICE_LAST_SYNC));
+        }
+
+
+    }
+
+    public void onClickSave(View v){
+        updateDevice(uuid.getText().toString(), name.getText().toString());
+
     }
 
 
@@ -68,11 +94,46 @@ public class DeviceActivity extends Activity{
         getAndDisplayGreeting.execute(uuid);
     }
 
-    public void displayDevice(ResourceDevice device){
-        EditText name = (EditText)this.findViewById(R.id.device_edit_name);
-        TextView uuid = (TextView)this.findViewById(R.id.device_edit_uuid);
-        TextView last_update = (TextView)this.findViewById(R.id.device_edit_last_update);
+    public void updateDevice(String uuid_str, String name_str){
+        AsyncTask<String, Void, ResourceDevice> sendGreetings = new AsyncTask<String, Void, ResourceDevice> () {
+            @Override
+            protected ResourceDevice doInBackground(String... strings) {
+                // Retrieve service handle.
+                Devices apiServiceHandle = AppConstants.getApiServiceHandle();
+                Log.d(LOG_TAG, strings[0] + strings[1]);
+                try {
+                    ResourceDeviceProtoName name = new ResourceDeviceProtoName();
 
+                    name.setName(strings[1]);
+                    ResourceDevice device = apiServiceHandle.device().update(strings[0], name).execute();
+                    return device;
+                } catch (IOException e) {
+                    Log.e(LOG_TAG, "Exception during API call", e);
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(ResourceDevice device) {
+                if (device!=null) {
+                    displayDevice(device);
+                    Toast toast = Toast.makeText(activity, activity.getString(R.string.devices_updated), Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL, 0, 0);
+                    toast.show();
+
+                } else {
+                    Log.e(LOG_TAG, "No greetings were returned by the API.");
+                    Toast toast = Toast.makeText(activity, activity.getString(R.string.error_updating), Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL, 0, 0);
+                    toast.show();
+                }
+            }
+        };
+
+        sendGreetings.execute(uuid_str, name_str);
+    }
+
+    public void displayDevice(ResourceDevice device){
         name.setText(device.getName());
         uuid.setText(device.getUuid());
         last_update.setText(device.getLastSync());

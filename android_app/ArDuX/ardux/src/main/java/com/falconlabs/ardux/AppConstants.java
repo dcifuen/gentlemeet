@@ -1,26 +1,24 @@
 package com.falconlabs.ardux;
 
-import android.app.Activity;
-import android.app.Dialog;
-import android.content.Context;
-
 import com.google.api.client.extensions.android.http.AndroidHttp;
-import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.appspot.www_ardux.devices.Devices;
+import com.google.api.client.json.gson.GsonFactory;
 
 import javax.annotation.Nullable;
 
 public class AppConstants {
 
     public static final String DEVICE_UUID = "DEVICE_UUID";
+    public static final String DEVICE_NAME = "DEVICE_NAME";
+    public static final String DEVICE_LAST_SYNC = "DEVICE_LAST_SYNC";
 
 
     /**
      * Class instance of the JSON factory.
      */
-    public static final JsonFactory JSON_FACTORY = new AndroidJsonFactory();
+    public static final JsonFactory JSON_FACTORY = new GsonFactory();
 
     /**
      * Class instance of the HTTP transport.
@@ -35,7 +33,7 @@ public class AppConstants {
         // Use a builder to help formulate the API request.
         Devices.Builder devices = new Devices.Builder(AppConstants.HTTP_TRANSPORT,
                 AppConstants.JSON_FACTORY,null);
-        devices.setRootUrl("http://192.168.1.128:8080/_ah/api/");
+        //devices.setRootUrl("http://192.168.1.122:8080/_ah/api/");
         return devices.build();
     }
 
