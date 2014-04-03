@@ -9,7 +9,6 @@ Device::Device()
 {
   wifly = WiFly::getInstance();
   EEPROM_readStruct(0, configuration);
-  read_nfc = false;
 }
 int Device::clear(){
   EEPROM_clear();
@@ -40,6 +39,7 @@ int Device::register_device(){
 
 int Device::sync_device(){
   String url = String(HOST) + String("sync/") + String(configuration.uuid);
+  DBG("Sync URl "+url+" \r\n");
   char buf[100];
   HTTPResponse response;
   url.toCharArray(buf, 100);
@@ -63,14 +63,6 @@ int Device::sync_device(){
   }
 }
 
-int Device::test_tcp(){
-  DBG("Connecting to remote server... \r\n");
-  while(!wifly->connect("162.222.182.19", 6543, 10));
-  DBG("Connected to remote server \r\n");
-  wifly->send("Hola Server", 10);
-  return 0;
-
-}
 
 
 

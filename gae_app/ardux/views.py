@@ -31,7 +31,7 @@ def warmup():
     return 'Warming Up...'
 
 
-@app.route('/device/register', methods=['GET'])
+@app.route('/device/register', methods=['GET', 'POST'])
 def device_register():
     device = ResourceDevice(uuid=''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(5)))
     device.put();
@@ -44,7 +44,7 @@ def device_sync(uuid):
     device.last_sync = datetime.datetime.now()
     device.put()
     if device:
-        return flask.jsonify(device.to_dict())
+        return flask.jsonify(device.to_dict(exclude=('resource_key',)))
     else:
         return 'Device not found', 404
 

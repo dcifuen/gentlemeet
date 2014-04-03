@@ -110,7 +110,7 @@ class ResourceDevice(EndpointsModel):
     @EndpointsAliasProperty(property_type=messages.BooleanField)
     def online(self):
         if self.last_sync:
-            return self.last_sync >= datetime.datetime.now()-datetime.timedelta(seconds=30)
+            return self.last_sync >= datetime.datetime.now()-datetime.timedelta(minutes=6)
         else:
             return False
 
@@ -129,6 +129,14 @@ class ResourceDevice(EndpointsModel):
             return devices[0]
         else:
             return None
+
+    def to_dict(self, *args, **kwargs):
+        result = super(ResourceDevice,self).to_dict(*args, **kwargs)
+        resource = self.resource
+        if resource:
+            result['resource'] = self.resource.to_dict(include=('name',))
+            result['events'] = [event.to_dict(exclude=('resource_key','attendees')) for event in ResourceEvent.query(ResourceEvent.resource_key == ndb.Key(ResourceCalendar,self.resource_id)).fetch()]
+        return result
 
 class ResourceEvent(EndpointsModel):
     """A replica of the actual Google Calendar event, needed for analysis
@@ -151,6 +159,7 @@ class ResourceEvent(EndpointsModel):
             return self.resource_key.id()
         else:
             return None
+
 
 
 class CheckIO(EndpointsModel):

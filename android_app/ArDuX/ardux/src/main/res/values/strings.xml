@@ -15,5 +15,15 @@
     <string name="pull_to_refresh_refreshing_label">Loading...</string>
     <string name="pull_to_refresh_tap_label">Tap to refresh...</string>
 
+    <string name="nfc_error">This device doesn\'t support NFC</string>
+    <string name="nfc_disabled">NFC is disabled</string>
+    <string name="nfc_empty_tag">NFC Tag is empty</string>
+
+    <string name="save_tag_btn">Save in Tag</string>
+    <string name="email">Email</string>
+    <string name="tag_message_scan">Scan tag to write email</string>
+    <string name="tag_message_success">Write success!</string>
+    <string name="tag_message_error">Write error!</string>
+
 
 </resources>

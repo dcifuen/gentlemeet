@@ -33,7 +33,7 @@ public class AppConstants {
         // Use a builder to help formulate the API request.
         Devices.Builder devices = new Devices.Builder(AppConstants.HTTP_TRANSPORT,
                 AppConstants.JSON_FACTORY,null);
-        //devices.setRootUrl("http://192.168.1.122:8080/_ah/api/");
+        devices.setRootUrl("http://192.168.1.121:8080/_ah/api/");
         return devices.build();
     }
 

@@ -12,10 +12,14 @@
 #include <Wire.h>
 #include "U8glib.h"
 #include "TM1637.h"
-#include <Adafruit_PN532.h>
 #include <SPI.h>
 #include <Time.h>
+#include "PN532_SPI.h"
+#include "snep.h"
+#include "NdefMessage.h"
+#include <avr/wdt.h>
 
+//#define RESET_CONF_ON_START
 
 
 #define CLK 0//pins definitions for TM1637 and can be changed to other ports    
@@ -27,11 +31,14 @@
 #define MISO (40)
 
 
-#define WAITING_TICKS 20 //Multiply this with 1 second to find the time
-//#define  RESET_CONF_ON_START 1
+#define WAITING_TICKS 30 //Multiply this with 1 second to find the time
+#define MAX_ERRORS 10
 
-#define SSID     "Apto"
-#define KEY      "12138026"
+#define RESET_PIN 7
+#define  RESET_CONF_ON_START 1
+
+#define SSID     "MotoX"
+#define KEY      "Salcedo1234"
 // WIFLY_AUTH_OPEN / WIFLY_AUTH_WPA1 / WIFLY_AUTH_WPA1_2 / WIFLY_AUTH_WPA2_PSK
 #define AUTH      WIFLY_AUTH_WPA2_PSK
 
@@ -41,7 +48,7 @@ boolean conected = false;
 int timer_ticks = 0;
 int8_t TimeDisp[] = {0x00,0x00,0x00,0x00};
 unsigned char ClockPoint = 1;
-uint32_t nfc_id = 0;
+uint32_t errors = 0;
 time_t time = 0;
 
 WiFly wifly(12, 3);
@@ -52,13 +59,22 @@ U8GLIB_SSD1306_128X64 u8g(U8G_I2C_OPT_NONE);
 
 TM1637 tm1637(CLK,DIO);
 
-Adafruit_PN532 nfc(SCK, MISO, MOSI, SS);
+PN532_SPI pn532spi(SPI, 10);
+SNEP nfc(pn532spi);
+uint8_t ndefBuf[1024];
+
+
 
 void setup()
 {
+  	
+  digitalWrite(RESET_PIN, HIGH);
+  delay(200);
+  pinMode(RESET_PIN, OUTPUT); 
+  
   #ifdef RESET_CONF_ON_START
       device.clear();
-      wifly.reset(); 
+      
   #endif
   #ifdef DEBUG
       Serial.begin(9600);
@@ -88,17 +104,11 @@ void setup()
   tm1637.set();
   tm1637.init();
   tm1637.display(TimeDisp);
-  
-  nfc.begin();
-
-  uint32_t versiondata = nfc.getFirmwareVersion();
-  
-  nfc.SAMConfig();
- 
+   
 
   char ssid[50];
   char pass[50];
-  int auth = AUTH;
+  uint8_t auth = AUTH;
   
   strcpy(ssid, SSID);
   strcpy(pass, KEY);
@@ -107,71 +117,60 @@ void setup()
     strcpy(ssid, device.configuration.ssid);
     strcpy(pass, device.configuration.pass);
     auth = device.configuration.auth;
+  }else{
+    strcpy(device.configuration.ssid, ssid);
+    strcpy(device.configuration.pass, pass);
+    device.configuration.auth = auth;
+    EEPROM_writeStruct(0, device.configuration);
   }
   
-  while (1) {
-    DBG("Try to join " + String(ssid)  + "\r\n");
-    if (wifly.join(ssid, pass, auth)) {
-      DBG("Succeed joining " + String(ssid) + "\r\n");
-      wifly.clear();
-      break;
-    } else {
-      DBG("Failed to join " + String(ssid) +"\r\n");
-      DBG("Wait 1 second and try again...\r\n");
-      delay(1000);
-    }
-  }
+  wifly.reset(); 
+  
+  connectWifi(ssid, pass, auth);
   
   wifly.enableRTC();
-  time = wifly.getTime();
-  setTime(time);
   
-  
+  updateTime();
+ 
   //Init timer interrupt every second
   Timer1.initialize(1000000);
   Timer1.attachInterrupt(sync);
   
-  
 }
 void loop()
-{
+{  
+ 
   /************* NFC *************/
-  uint8_t success;                          
-  uint8_t uid[] = { 0, 0, 0, 0, 0, 0, 0 }; 
-  uint8_t uidLength;                      
-  success = nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength);
-  if (success){
-    if(!NFCTAG_writeStruct(nfc, sizeof(device.configuration), device.configuration))
-         DBG("Error Writing Tag \r\n");
-      else
-      {
-         device.read_nfc = true;
-         DBG("Tag Writed \r\n");
-      }
-  }
-  
+  if (NFCSendDeviceID()) {
+    //ID sent to android, time for configuration.
+    
+  }   
     
   //******** SYNC ************
   if(sync_flag){
+    /************** Wifi ************/
+    connectWifi(device.configuration.ssid, device.configuration.pass, device.configuration.auth);
+    
     sync_flag = false;
     syncing = true;
-    time = wifly.getTime();
-    if(time > 0){
-      setTime(time);
-    }
+    updateTime();
     DBG("Sync in progress...\r\n");
     if(strlen(device.configuration.uuid) == 0){
         DBG("No UID found \r\n");
         if(device.register_device()){
           DBG("Device registered \r\n");
+          errors = 0;
         }else{
           DBG("Error registering device \r\n");
+          errors++;
         }
      }else{
        if(device.sync_device()){
           DBG("Device synced \r\n");
+          errors = 0;
         }else{
           DBG("Error syncing device \r\n");
+          errors++;
         }
      }
      syncing = false;
@@ -213,5 +212,64 @@ void sync(){
   }else{
     timer_ticks++;
   } 
+  //******** Error control ***********/
+  if(errors >= MAX_ERRORS){
+    DBG("Maximun errors ("+String(errors)+") reached, reboting...\r\n");
+    delay(1000);
+    softwareReboot();
+  }
 }
+
+bool NFCSendDeviceID(){
+    DBG("Send a message to Android \r\n");
+    NdefMessage message = NdefMessage();
+    message.addTextRecord("uuid:"+String(device.configuration.uuid));
+    int messageSize = message.getEncodedSize();
+    if (messageSize > sizeof(ndefBuf)) {
+        DBG("ndefBuf is too small \r\n");
+    }
+
+    message.encode(ndefBuf);
+    if (0 >= nfc.write(ndefBuf, messageSize, 1000)) {
+        DBG("Failed \r\n");
+        return false;
+    } else {
+        DBG("Success \r\n");
+        return true;
+    }
+
+}
+
+void connectWifi(char* ssid,char* pass, uint8_t auth){
+  
+  while (!wifly.isAssociated()) {
+    DBG("Try to join " + String(ssid)  + "\r\n");
+    if (wifly.join(ssid, pass, auth)) {
+      DBG("Succeed joining " + String(ssid) + "\r\n");
+      wifly.clear();
+      errors = 0;
+      break;
+    } else {
+      DBG("Failed to join " + String(ssid) +"\r\n");
+      DBG("Wait 1 second and try again...\r\n");
+      errors++;
+      delay(1000);
+    }
+  } 
+}
+void updateTime(){
+  time = wifly.getTime();
+  DBG("Updating timestamp to "+ String(time)+" \r\n");
+  setTime(time);
+}
+
+void softwareReboot()
+{
+  digitalWrite(RESET_PIN, LOW);
+  while(1)
+  {
+  }
+}
+
+
 

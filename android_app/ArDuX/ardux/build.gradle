@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.6.+'
+        classpath 'com.android.tools.build:gradle:0.9.+'
     }
 }
 apply plugin: 'android'
@@ -21,7 +21,7 @@ android {
     buildToolsVersion "19.0.0"
 
     defaultConfig {
-        minSdkVersion 8
+        minSdkVersion 16
         targetSdkVersion 19
         versionCode 1
         versionName "1.0"
@@ -36,9 +36,7 @@ android {
 }
 
 dependencies {
-
     compile 'com.android.support:support-v4:19.0.+'
-
     compile 'com.android.support:appcompat-v7:+'
     // BEGIN Google APIs
     // Play Services will validate the application prior to allowing OAuth2 access.
@@ -72,7 +70,6 @@ dependencies {
     // This is used by the Google HTTP client library.
     compile(group: 'com.google.guava', name: 'guava', version: '14.0.+')
     compile 'com.google.http-client:google-http-client-gson:1.17.0-rc'
-
     compile fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
-
+    compile files('/Users/jorgesalcedo/PycharmProjects/ArDuX/android_app/ArDuX/libs/ndeftools-1.2.3.jar')
 }

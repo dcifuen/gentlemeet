@@ -14,8 +14,7 @@
                     </div>
                     <div>
                         <label>Resource: </label>
-                        <select class="span3" ng-model="device.resource_id">
-                            <option ng-repeat="resource in resources" value="[[resource.id]]">[[resource.name]]</option>
+                        <select class="span3" ng-model="device.resource_id" ng-options="resource.id as resource.name for resource in resources">
                         </select>
                     </div>
                     <div class="btn-group">
