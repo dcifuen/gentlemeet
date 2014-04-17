@@ -58,6 +58,9 @@ handlers:
   script: run.deferred_app
   login: admin
 
+- url: /admin/static/
+  static_dir: lib/flask_admin/static
+
 - url: /static
   static_dir: ardux/static
 
