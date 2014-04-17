@@ -6,6 +6,7 @@ import string
 
 
 from google.appengine.api import users
+from google.appengine.ext import deferred
 from ardux.tasks import sync_resources
 
 from flask import current_app as app
