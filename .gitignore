@@ -55,3 +55,6 @@ docs/_build/
 .idea/
 *.pyc
 .DS_Store
+
+# Don't store secret keys in version control
+secret_keys.py
