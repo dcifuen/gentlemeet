@@ -41,7 +41,7 @@ class Config(object):
     # Flask-Cache settings
     CACHE_TYPE = 'gaememcached'
 
-    SOURCE_APP_NAME = 'ArDuX'
+    SOURCE_APP_NAME = 'GentleMeet'
 
     OAUTH2_SCOPE = 'https://www.googleapis.com/auth/calendar'
 

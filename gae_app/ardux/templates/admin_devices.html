@@ -1,0 +1,24 @@
+{% extends 'base_angular.html' %}
+{% block angular_content %}
+    <div ng-controller="devicesCtrl">
+        <table class="table">
+            <thead>
+            <th>UUID</th>
+            <th>Name</th>
+            <th>Online</th>
+            </thead>
+            <tbody>
+            <tr ng-repeat="device in devices">
+                <td><a href="/admin/devices/device/[[device.uuid]]"> [[ device.uuid ]]</a></td>
+                <td>[[ device.name ]]</td>
+                <td>[[ device.online ]]</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block tail_js %}
+    {{ super() }}
+    <script type="text/javascript" src="/static/js/angular/controllers/devicesCtrl.js"></script>
+{% endblock %}

@@ -4,10 +4,12 @@ runtime: python27
 api_version: 1
 threadsafe: true
 
-default_expiration: "1d"
+default_expiration: "5d"
 
 builtins:
 - remote_api: on
+- appstats: on
+- admin_redirect: on
 
 libraries:
 - name: jinja2
@@ -16,21 +18,39 @@ libraries:
   version: "latest"
 - name: endpoints
   version: "latest"
+- name: lxml
+  version: "latest"
 
 inbound_services:
 - warmup
 
-skip_files:
-- ^(.*/)?#.*#
-- ^(.*/)?.*~
-- ^(.*/)?.*\.py[co]
-- ^(.*/)?.*/RCS/.*
-- ^(.*/)?\..*
-- ^(.*/)?\.bak
-- ^(.*/)?.*/tests/.*
-- ^(.*/)?.*/data/.*
+error_handlers:
+  - file: ardux/static/html/default_error.html
+
+  - error_code: over_quota
+    file: ardux/static/html/over_quota.html
+
+  - error_code: dos_api_denial
+    file: ardux/static/html/dos.html
+
+  - error_code: timeout
+    file: ardux/static/html/timeout.html
 
 handlers:
+- url: /favicon.ico
+  static_files: ardux/static/img/favicon.ico
+  upload: ardux/static/img/favicon.ico
+
+- url: /robots.txt
+  static_files: ardux/static/robots.txt
+  upload: ardux/static/robots.txt
+
+- url: /gae_mini_profiler/static
+  static_dir: lib/gae_mini_profiler/static
+
+- url: /gae_mini_profiler/.*
+  script: lib.gae_mini_profiler.main.application
+
 - url: /_ah/spi/.*
   script: run.api
 
@@ -40,10 +60,6 @@ handlers:
 
 - url: /static
   static_dir: ardux/static
-
-- url: /favicon.ico
-  static_files: ardux/static/img/favicon.ico
-  upload: ardux/static/img/favicon.ico
 
 - url: .*
   script: run.app

@@ -7,10 +7,9 @@ Important: Place your keys in the secret_keys.py module,
            which should be kept out of version control.
 
 """
-import os
-import constants
 
-from secret_keys import CSRF_SECRET_KEY, SESSION_KEY
+from secret_keys import CSRF_SECRET_KEY, SESSION_KEY, OAUTH2_CLIENT_ID, \
+    OAUTH2_CLIENT_SECRET
 
 
 class Config(object):
@@ -26,6 +25,9 @@ class Config(object):
     # Set secret keys for CSRF protection
     SECRET_KEY = CSRF_SECRET_KEY
     CSRF_SESSION_KEY = SESSION_KEY
+
+    OAUTH2_CLIENT_ID = OAUTH2_CLIENT_ID
+    OAUTH2_CLIENT_SECRET = OAUTH2_CLIENT_SECRET
 
     # Flask-Cache settings
     CACHE_TYPE = 'gaememcached'
@@ -66,22 +68,3 @@ def get_setting(key):
     return app.config[key]
 
 
-def get_environment():
-    """
-    Returns the environment based on the OS variable, server name and app id
-    :return: The current environment that the app is running on
-    """
-    # Auto-set settings object based on App Engine dev environ
-    if 'SERVER_SOFTWARE' in os.environ:
-        if os.environ['SERVER_SOFTWARE'].startswith('Dev'):
-            return constants.ENV_LOCAL
-        elif os.environ['SERVER_SOFTWARE'].startswith('Google App Engine/'):
-            #For considering an environment staging we assume the version id
-            # contains -staging and the URL
-            current_version_id = str(os.environ['CURRENT_VERSION_ID']) if (
-                'CURRENT_VERSION_ID') in os.environ else ''
-            if '-staging' in current_version_id:
-                return constants.ENV_STAGING
-            #If not local or staging then is production TODO: really?
-            return constants.ENV_PRODUCTION
-    return constants.ENV_LOCAL
