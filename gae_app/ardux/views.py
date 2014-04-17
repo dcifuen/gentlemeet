@@ -6,6 +6,7 @@ import string
 
 
 from google.appengine.api import users
+from ardux.tasks import sync_resources
 
 from flask import current_app as app
 from flask import redirect, g, session, request, make_response
@@ -15,6 +16,7 @@ from flask.templating import render_template
 from settings import get_setting
 from ardux.models import ResourceDevice
 import flask
+import datetime
 
 import json
 
@@ -38,7 +40,7 @@ def warmup():
     return 'Warming Up...'
 
 
-@app.route('/device/register', methods=['POST'])
+@app.route('/device/register', methods=['GET', 'POST'])
 def device_register():
     device = ResourceDevice(uuid=''.join(
         random.choice(string.ascii_uppercase + string.digits) for x in
@@ -50,10 +52,19 @@ def device_register():
 @app.route('/device/sync/<uuid>')
 def device_sync(uuid):
     device = ResourceDevice.query(ResourceDevice.uuid == uuid).fetch(1)[0]
+    device.last_sync = datetime.datetime.now()
+    device.put()
     if device:
-        return flask.jsonify(device.to_dict())
+        return flask.jsonify(device.to_dict(exclude=('resource_key',)))
     else:
         return 'Device not found', 404
+
+
+@app.route('/cron/sync/resources')
+def resources_sync():
+    logging.info("Scheduling sync task")
+    deferred.defer(sync_resources)
+    return "Scheduling sync task..."
 
 
 @app.route('/signout')

@@ -5,7 +5,7 @@
 #define DEBUG
 
 #ifdef DEBUG
-#define DBG(message)    Serial.print(message)
+#define DBG(args...)       Serial.print(args)
 #else
 #define DBG(message)
 #endif // DEBUG

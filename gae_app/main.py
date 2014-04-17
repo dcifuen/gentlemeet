@@ -1,4 +1,5 @@
 from google.appengine.api import users
+from ardux.utils import CustomJSONEncoder
 
 from flask.app import Flask
 from flask.ext.admin.base import MenuLink
@@ -11,6 +12,7 @@ from flask_admin import Admin
 import logging
 
 flask_app = Flask(__name__)
+flask_app.json_encoder = CustomJSONEncoder
 with flask_app.app_context():
     environment = get_environment()
     #Load settings from the corresponding class
@@ -40,6 +42,11 @@ with flask_app.app_context():
     admin.add_link(MenuLink(
         name='Logout',
         url=users.create_logout_url(admin_url)
+    ))
+
+    admin.add_view(admin_views.DevicesView(
+        name='Devices',
+        endpoint='devices',
     ))
 
     admin.add_view(admin_views.OAuthView(

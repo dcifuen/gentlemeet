@@ -1,10 +1,11 @@
-#ifndef __EEPROM_STRUCT_H__
-#define __EEPROM_STRUCT_H__
+#ifndef __MEMORY_STRUCT_H__
+#define __MEMORY_STRUCT_H__
+
 
 #include <EEPROM.h>
 #include <Arduino.h>  // for type definitions
+#include "Debug.h"
 #define EEPROM_SIZE 4096
-
 
 template <class T> int EEPROM_writeStruct(int ee, const T& value)
 {
@@ -24,10 +25,7 @@ template <class T> int EEPROM_readStruct(int ee, T& value)
     return i;
 }
 
-void EEPROM_clear()
-{
-  for (int i = 0; i < EEPROM_SIZE; i++)
-      EEPROM.write(i, 0);
-}
+void EEPROM_clear();
 
-#endif // __EEPROM_STRUCT_H__
+
+#endif // __MEMORY_STRUCT_H__
