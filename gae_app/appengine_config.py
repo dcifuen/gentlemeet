@@ -6,8 +6,7 @@ def namespace_manager_default_namespace_for_request():
     test without touching production data while we are in staging
     :return: staging if it is the current environment None otherwise
     """
-    from main import get_environment
-    import constants
+    from ardux import get_environment, constants
     environment = get_environment()
     namespace = 'staging' if environment == constants.ENV_STAGING else None
     return namespace
