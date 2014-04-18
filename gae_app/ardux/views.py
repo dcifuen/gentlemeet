@@ -3,28 +3,25 @@
 import logging
 import random
 import string
-
+import datetime
+import json
 
 from google.appengine.api import users
 from google.appengine.ext import deferred
-from ardux.tasks import sync_resources
+import httplib2
 
+from ardux.tasks import sync_resources
 from flask import current_app as app
 from flask import redirect, g, session, request, make_response
 from flask.helpers import url_for
 from flask.templating import render_template
-
-from settings import get_setting
 from ardux.models import ResourceDevice
 import flask
-import datetime
-
-import json
-
-import httplib2
-
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
+import constants
+from ardux import app
+
 
 @app.route('/')
 def index():
@@ -83,9 +80,9 @@ def sign_in():
     # Set the Client ID, Token State, and Application Name in the HTML while
     # serving it.
     return render_template('signin.html',
-                           CLIENT_ID=get_setting('OAUTH2_CLIENT_ID'),
+                           CLIENT_ID=app.config.get('OAUTH2_CLIENT_ID'),
                            STATE=state,
-                           APPLICATION_NAME=get_setting('SOURCE_APP_NAME'))
+                           APPLICATION_NAME=constants.SOURCE_APP_NAME)
 
 
 @app.route('/connect', methods=['POST'])

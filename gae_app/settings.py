@@ -55,16 +55,3 @@ class TestingConfig(Config):
     PRODUCTION = False
     CSRF_ENABLED = False
     pass
-
-
-def get_setting(key):
-    """
-    Get the value for a setting with the given key, since cache is shared
-    between staging and production is necessary to include that in the key too
-    :param key: string that represents the setting key
-    :return: the value of the setting
-    """
-    from main import app
-    return app.config[key]
-
-

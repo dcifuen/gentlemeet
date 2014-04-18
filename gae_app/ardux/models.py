@@ -1,18 +1,21 @@
-import logging
-from google.appengine.ext import ndb
-from endpoints_proto_datastore.ndb.model import EndpointsModel, EndpointsAliasProperty
-from protorpc import messages
-from settings import get_setting
 import re
-from google.appengine.api.datastore_errors import BadValueError
 import datetime
+
+from google.appengine.ext import ndb
+from protorpc import messages
+from google.appengine.api.datastore_errors import BadValueError
+
+from endpoints_proto_datastore.ndb.model import EndpointsModel, EndpointsAliasProperty
+import constants
+
 
 def validate_email(property, value):
     if value is None:
         return value
-    elif not re.match(get_setting('EMAIL_REGEXP'), value):
+    elif not re.match(constants.EMAIL_REGEXP, value):
         raise BadValueError
     return value.lower()
+
 
 def get_domain_from_email(entity):
     if entity.installer_user:
@@ -66,26 +69,10 @@ class ResourceDevice(EndpointsModel):
     """
     _message_fields_schema = ('name', 'uuid', 'uuid_query','type','state', 'last_sync', 'online', 'resource_id', 'resource')
 
-    TYPE_PHYSICAL = 'PHYSICAL'
-    TYPE_WEB = 'WEB'
-    TYPE_CHOICES = [
-        TYPE_PHYSICAL,
-        TYPE_WEB,
-    ]
-
-    STATE_REGISTERED = 'REGISTERED'
-    STATE_ACTIVE = 'ACTIVE'
-    STATE_INACTIVE = 'INACTIVE'
-    STATE_CHOICES = [
-        STATE_REGISTERED,
-        STATE_ACTIVE,
-        STATE_INACTIVE,
-    ]
-
     name = ndb.StringProperty()
     uuid = ndb.StringProperty()
-    type = ndb.StringProperty(choices=TYPE_CHOICES, indexed=False)
-    state = ndb.StringProperty(choices=STATE_CHOICES, indexed=False)
+    type = ndb.StringProperty(choices=constants.TYPE_CHOICES, indexed=False)
+    state = ndb.StringProperty(choices=constants.STATE_CHOICES, indexed=False)
     last_sync = ndb.DateTimeProperty(auto_now_add=True)
     resource_key = ndb.KeyProperty(ResourceCalendar, indexed=False)
 
@@ -138,6 +125,7 @@ class ResourceDevice(EndpointsModel):
             result['events'] = [event.to_dict(exclude=('resource_key','attendees')) for event in ResourceEvent.query(ResourceEvent.resource_key == ndb.Key(ResourceCalendar,self.resource_id)).fetch()]
         return result
 
+
 class ResourceEvent(EndpointsModel):
     """A replica of the actual Google Calendar event, needed for analysis
     and sync purposes. All day or recurrent events are not supported
@@ -161,22 +149,14 @@ class ResourceEvent(EndpointsModel):
             return None
 
 
-
 class CheckIO(EndpointsModel):
     """Records the check ins and check outs of the attendees and based on that
     marks the resource as free or busy.
     """
-    TYPE_IN = 'IN'
-    TYPE_OUT = 'OUT'
-    TYPE_CHOICES = [
-        TYPE_IN,
-        TYPE_OUT,
-    ]
-
     attendee = ndb.StringProperty(indexed=False)
     date_time = ndb.DateTimeProperty(required=True, auto_now_add=True,
                                      indexed=False)
-    type = ndb.StringProperty(choices=TYPE_CHOICES, required=True,
+    type = ndb.StringProperty(choices=constants.TYPE_CHOICES, required=True,
                               indexed=False)
     event = ndb.KeyProperty(ResourceEvent, indexed=False)
     resource = ndb.KeyProperty(ResourceCalendar, required=True, indexed=False)

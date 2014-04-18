@@ -6,7 +6,7 @@ from flask.ext.admin.base import AdminIndexView, expose_plugview
 from werkzeug.routing import RequestRedirect
 import logging
 from flask import abort, redirect, helpers, request
-from settings import get_setting
+import constants
 
 
 class AuthView(BaseView):
@@ -71,7 +71,7 @@ class OAuthView(AuthView):
             client.put()
         #Get the login hint from configuration
         approval_prompt = 'auto' if client.refresh_token else 'force'
-        scope = get_setting('OAUTH2_SCOPE')
+        scope = constants.OAUTH2_SCOPE
         redirect_uri = helpers.url_for('oauth.oauth_callback',
                                         _external = True)
         oauth_helper = OAuthDanceHelper(redirect_uri, approval_prompt, scope)

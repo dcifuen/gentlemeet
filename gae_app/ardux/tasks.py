@@ -1,12 +1,13 @@
 from datetime import datetime, timedelta
 import logging
+
+from google.appengine.ext import ndb, deferred
+
 from ardux.helpers import CalendarResourceHelper, CalendarHelper
 from ardux.models import Client, ResourceCalendar, ResourceEvent
-from google.appengine.ext import ndb, deferred
 from dateutil.parser import parse
-from settings import get_setting
-from pytz import timezone
 import pytz
+import constants
 
 
 def sync_resources():
@@ -58,8 +59,10 @@ def sync_resource_events(resource_id, resource_email):
                                             alwaysIncludeEmail=True,
                                             orderBy="startTime",
                                             singleEvents=True,
-                                            timeMax=one_week_after.strftime(get_setting('CALENDAR_DATE_TIME')),
-                                            timeMin=today.strftime(get_setting('CALENDAR_DATE_TIME'))
+                                            timeMax=one_week_after.strftime(
+                                                constants.CALENDAR_DATE_TIME),
+                                            timeMin=today.strftime(
+                                                constants.CALENDAR_DATE_TIME)
                                             )
 
                 for event in events:

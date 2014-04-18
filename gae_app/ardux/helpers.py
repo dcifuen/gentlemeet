@@ -2,19 +2,17 @@
 # vim: set fileencoding=utf-8
 
 import logging
-from xml.dom.minidom import Document, Element
+
+import httplib2
+
 from gdata.calendar_resource.client import CalendarResourceClient
 import gdata
 from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.client import Credentials
-from suds.client import Client
-from suds.transport.http import HttpAuthenticated
 from apiclient.discovery import build
-from settings import get_setting
-import pytz
-from pytz import timezone
+from ardux import app
+import constants
 
-import httplib2
 
 class OAuthDanceHelper:
     """ OAuth dance helper class"""
@@ -22,10 +20,10 @@ class OAuthDanceHelper:
 
     def __init__(self, redirect_uri='', approval_prompt='auto',
                  scope=None):
-        scope = get_setting('OAUTH2_SCOPE')
+        scope = app.config.get('OAUTH2_SCOPE')
         self.flow = OAuth2WebServerFlow(
-            client_id=get_setting('OAUTH2_CLIENT_ID'),
-            client_secret=get_setting(
+            client_id=app.config.get('OAUTH2_CLIENT_ID'),
+            client_secret=app.config.get(
                 'OAUTH2_CLIENT_SECRET'),
             scope=scope,
             redirect_uri=redirect_uri,
@@ -85,11 +83,11 @@ class CalendarHelper(OAuthServiceHelper):
 
     def update_calendar_event(self,calendar_id, envent_id, summary, start_date, end_date):
         event = {'id':envent_id}
-        event.update({'start':{'dateTime':start_date.strftime(get_setting(
-            'CALENDAR_DATE_FORMAT')),
+        event.update({'start':{'dateTime': start_date.strftime(constants
+                                                               .CALENDAR_DATE_FORMAT),
                                'timeZone': "UTC"}})
-        event.update({'end':{'dateTime':end_date.strftime(get_setting(
-            'CALENDAR_DATE_FORMAT')),
+        event.update({'end':{'dateTime': end_date.strftime(constants
+                                                           .CALENDAR_DATE_FORMAT),
                              'timeZone': "UTC"}})
         event.update({'summary':summary})
         return self.service.events().update(calendarId=calendar_id, eventId=event['id'], body=event).execute()
@@ -110,10 +108,8 @@ class CalendarHelper(OAuthServiceHelper):
         if location:
             event.update({'location': location})
         event.update({'attendees': attendees_list})
-        event.update({'start': {'dateTime':start_date.strftime(get_setting(
-            'CALENDAR_DATE_FORMAT'))}})
-        event.update({'end': {'dateTime':end_date.strftime(get_setting(
-            'CALENDAR_DATE_FORMAT'))}})
+        event.update({'start': {'dateTime':start_date.strftime(constants.CALENDAR_DATE_FORMAT)}})
+        event.update({'end': {'dateTime':end_date.strftime(constants.CALENDAR_DATE_FORMAT)}})
         event.update({'summary':summary})
         if event_id:
             return self.service.events().update(calendarId=calendar_id,
@@ -128,10 +124,8 @@ class CalendarHelper(OAuthServiceHelper):
 
     def is_calendar_available(self, calendar_id, start_date, end_date):
         response = self.service.freebusy().query(body={'timeMin': start_date
-                                    .strftime(get_setting(
-                                    'CALENDAR_DATE_FORMAT')),
-                                    'timeMax': end_date.strftime(get_setting(
-                                    'CALENDAR_DATE_FORMAT')),
+                                    .strftime(constants.CALENDAR_DATE_FORMAT),
+                                    'timeMax': end_date.strftime(constants.CALENDAR_DATE_FORMAT),
                                     'items': [{'id': calendar_id}]
                                     }).execute()
         return len(response['calendars'][calendar_id]['busy']) == 0
