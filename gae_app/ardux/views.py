@@ -11,7 +11,6 @@ from google.appengine.ext import deferred
 import httplib2
 
 from ardux.tasks import sync_resources
-from flask import current_app as app
 from flask import redirect, g, session, request, make_response
 from flask.helpers import url_for
 from flask.templating import render_template
@@ -194,6 +193,6 @@ def page_not_found(e):
 
 @app.errorhandler(500)
 def page_error(e):
-    logging.error('500 error %s', e)
+    logging.error('500 error: %s', e)
     return render_template('500.html'), 500
 

@@ -46,6 +46,7 @@ def sync_resources():
     else:
         logging.warn("No client found for resources sync")
 
+#TODO: Check if instead (or in addition) to polling we can use web hooks
 def sync_resource_events(resource_id, resource_email):
     client = Client.get_by_id(1)
     if client:

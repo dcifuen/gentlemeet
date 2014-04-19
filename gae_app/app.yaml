@@ -45,6 +45,10 @@ handlers:
   static_files: ardux/static/robots.txt
   upload: ardux/static/robots.txt
 
+- url: /
+  static_files: ardux/static/html/index.html
+  upload: ardux/static/html/index.html
+
 - url: /gae_mini_profiler/static
   static_dir: lib/gae_mini_profiler/static
 
