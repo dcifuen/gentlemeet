@@ -1,0 +1,33 @@
+application: <your_app_id>
+version: v3
+runtime: python27
+api_version: 1
+threadsafe: yes
+
+inbound_services:
+  - warmup
+
+handlers:
+
+- url: /static
+  static_dir: static
+
+- url: /favicon\.ico
+  static_files: favicon.ico
+  upload: favicon\.ico
+
+- url: /_ah/spi/.*
+  script: main.app.api
+
+- url: .*
+  script: main.app
+  
+libraries:
+- name: endpoints
+  version: "latest"
+  
+- name: webapp2
+  version: "latest"
+  
+- name: jinja2
+  version: "latest"

@@ -1,0 +1,87 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    {% block head %}
+        <link rel="stylesheet" href="/static/css/admin_style.css">
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+        <title>{% block title %}{% endblock %} - Admin</title>
+        {% block head_js %}
+            <script type="application/javascript">
+                window.mode = "admin";
+                window.app_host = "{{request.host}}";
+                window.api_host = "{{ api_host }}";
+                window.loading_apis = false;
+                window.google_client_loaded = false;
+                function api_init() {
+                    console.log("Initializing Endpoints Service");
+                    window.apis = [
+                        {name: 'apVisor', version: 'v1'},
+                        {name: 'hotspotGameApi', version: 'v1'}
+                    ];
+
+                    if (window.api_load && !window.loading_apis) {
+                        for (i in window.apis) {
+                            var api = window.apis[i];
+                            window.api_load(api.name, api.version);
+                        }
+                        window.loading_apis = true;
+                    } else {
+                        window.google_client_loaded = true;
+                    }
+                }
+            </script>
+        {% endblock %}
+        {% block angularjs %}
+            <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+            <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
+            <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular.min.js"></script>
+            <script src="/static/js/app.js"></script>
+            <script src="/static/js/services/endpointsService.js"></script>
+            <script src="/static/js/directives/directives.js"></script>
+        {% endblock %}
+    {% endblock %}
+</head>
+<body ng-app="gApp">
+<div id="tooltip"><img src="" alt=""/></div>
+<header class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+        <a class="navbar-brand" href="#">Test App</a>
+
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                {% for view_name, view in admin_views.items() %}
+                    <li><a href="{{ uri_for(view_name) }}">{{ view.title }}</a></li>
+                {% endfor %}
+            </ul>
+
+
+            <p class="navbar-text navbar-right">{{ user.name }} <a href="{{ uri_for('logout') }}">Logout</a></p>
+
+            <div id="loadingWidget" class="row-fluid ui-corner-all navbar-text navbar-right"
+                 style="padding: 0 .7em;margin-top:10px; margin-bottom: 0;" loading-widget>
+                <div class="loadingContent">
+                    <p>
+                        <img alt="Loading..." src="/static/image/loader.gif"/>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+<div id="content" class="container">
+    <div class="overlay" ng-show="!loaded"><h1 id="overlayText">Loading ...</h1></div>
+    {% block content %}{% endblock %}
+</div>
+<footer>
+    <div class="container">
+        <center>
+            {% block footer %}
+                <a href="#">WebEngine</a>.
+            {% endblock %}
+        </center>
+    </div>
+</footer>
+<script src="https://apis.google.com/js/client.js?onload=api_init"></script>
+</body>
