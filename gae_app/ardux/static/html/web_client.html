@@ -1,0 +1,61 @@
+<html>
+    <head>
+        <title>Gentlemeet</title>
+        <!-- css-->
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+
+        <!-- js libraries -->
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.10.0/ui-bootstrap.js"></script>
+
+
+        <!-- gentlemeet js -->
+        <script src="/static/js/angular/gentlemeet.js"></script>
+        <script src="/static/js/angular/directives/directives.js"></script>
+        <script src="/static/js/angular/services/endpointsService.js"></script>
+        <script src="/static/js/angular/controllers/web_client_ctrl.js"></script>
+        <script type="application/javascript">
+
+            var host_name_array = window.location.host.split('.');
+            if(window.location.host.indexOf('appspot') &&
+                    host_name_array.length > 3){
+                window.api_host = host_name_array[0] + '-dot-';
+                for(index = 1; index < host_name_array.length; index++ ){
+                    window.api_host += host_name_array[index];
+                }
+            }else{
+                window.api_host = window.location.host;
+            }
+
+
+            window.loading_apis = false;
+            window.google_client_loaded = false;
+            function api_init() {
+                console.log("Initializing Endpoints Service");
+                window.apis = [
+                    {name: 'devices', version: 'v1'},
+                ];
+
+                if (window.api_load && !window.loading_apis) {
+                    for (i in window.apis) {
+                        var api = window.apis[i];
+                        window.api_load(api.name, api.version);
+                    }
+                    window.loading_apis = true;
+                } else {
+                    window.google_client_loaded = true;
+                }
+            }
+        </script>
+        <script src="https://apis.google.com/js/client.js?onload=api_init"></script>
+
+    </head>
+    <body ng-app="gApp">
+         <div ng-controller="testCtrl">
+             asEF
+
+        </div>
+    </body>
+</html>

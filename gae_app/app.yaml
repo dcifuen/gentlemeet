@@ -49,6 +49,10 @@ handlers:
   static_files: ardux/static/html/index.html
   upload: ardux/static/html/index.html
 
+- url: /client/web
+  static_files: ardux/static/html/web_client.html
+  upload: ardux/static/html/web_client.html
+
 - url: /gae_mini_profiler/static
   static_dir: lib/gae_mini_profiler/static
 
