@@ -24,10 +24,12 @@ EMAIL_REGEXP = "^[a-zA-Z0-9._%-]+@[a-zA-Z0-9._%-]+.[a-zA-Z]{2,6}$"
 OAUTH2_SCOPE = 'https://www.googleapis.com/auth/calendar ' \
                'https://apps-apis.google.com/a/feeds/calendar/resource/'
 
+OAUTH2_CLIENT_ID = '233923764866.apps.googleusercontent.com'
+
 #Model constants
 TYPE_PHYSICAL = 'PHYSICAL'
 TYPE_WEB = 'WEB'
-TYPE_CHOICES = [
+DEVICE_CHOICES = [
     TYPE_PHYSICAL,
     TYPE_WEB,
 ]
@@ -43,9 +45,8 @@ STATE_CHOICES = [
 
 TYPE_IN = 'IN'
 TYPE_OUT = 'OUT'
-TYPE_CHOICES = [
+DEVICE_CHOICES = [
     TYPE_IN,
     TYPE_OUT,
 ]
 
-OAUTH2_CLIENT_ID = '233923764866.apps.googleusercontent.com'

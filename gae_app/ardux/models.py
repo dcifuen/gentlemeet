@@ -133,7 +133,10 @@ class ResourceEvent(EndpointsModel):
     organizer = ndb.StringProperty(indexed=False)
     start_date_time = ndb.DateTimeProperty(indexed=False)
     end_date_time = ndb.DateTimeProperty(indexed=False)
-    attendees = ndb.StringProperty(repeated=True, indexed=False)
+    actual_attendees = ndb.StringProperty(repeated=True, indexed=False)
+    yes_attendees = ndb.StringProperty(repeated=True, indexed=False)
+    no_attendees = ndb.StringProperty(repeated=True, indexed=False)
+    maybe_attendees = ndb.StringProperty(repeated=True, indexed=False)
     resource_key = ndb.KeyProperty(ResourceCalendar)
     summary = ndb.StringProperty(indexed=False)
 
