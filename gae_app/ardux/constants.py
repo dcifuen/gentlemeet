@@ -47,3 +47,5 @@ TYPE_CHOICES = [
     TYPE_IN,
     TYPE_OUT,
 ]
+
+OAUTH2_CLIENT_ID = '233923764866.apps.googleusercontent.com'

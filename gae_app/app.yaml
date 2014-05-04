@@ -1,5 +1,5 @@
 application: www-ardux
-version: 1
+version: landing
 runtime: python27
 api_version: 1
 threadsafe: true

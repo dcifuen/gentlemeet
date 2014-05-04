@@ -79,7 +79,7 @@ def sign_in():
     # Set the Client ID, Token State, and Application Name in the HTML while
     # serving it.
     return render_template('signin.html',
-                           CLIENT_ID=app.config.get('OAUTH2_CLIENT_ID'),
+                           CLIENT_ID=constants.OAUTH2_CLIENT_ID,
                            STATE=state,
                            APPLICATION_NAME=constants.SOURCE_APP_NAME)
 
