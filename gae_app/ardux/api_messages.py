@@ -1,21 +1,13 @@
 # -*- coding: utf-8 -*-
-from protorpc import messages
-
-class String(messages.Message):
-    value = messages.StringField(1)
-
-
-class StringList(messages.Message):
-    items = messages.MessageField(String, 1, repeated=True)
+from protorpc import messages, message_types
+import endpoints
+from protorpc.message_types import VoidMessage
 
 
 class CheckInOutMessage(messages.Message):
+    userEmail = messages.StringField(1, required=True)
 
-    user_email = messages.StringField(1, required=True)
 
-    class CheckInOutChoices(messages.Enum):
-        IN = 1
-        OUT = 2
-    type = messages.EnumField(CheckInOutChoices, 2, required=True,
-                              default=CheckInOutChoices.IN)
-    event_id = messages.IntegerField(3, required=True)
+ID_RESOURCE = endpoints.ResourceContainer(
+    VoidMessage,
+    id=messages.IntegerField(1, variant=messages.Variant.INT32))

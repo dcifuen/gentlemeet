@@ -5,9 +5,14 @@ tests.py
 """
 import unittest
 import base64
+import datetime
 
 from google.appengine.ext import testbed, deferred, ndb
-from birthday.models import User, get_birthdays
+
+from apis import GentleMeetApi
+from constants import CHECK_IN
+from models import ResourceEvent, CheckInOut
+
 
 USAGE = """
 Path to your sdk must be the first argument. To run type:
@@ -17,7 +22,7 @@ $ utrunner.py tests.py path/to/your/appengine/installation
 Remember to set environment variable FLASK_CONF to TEST.
 Loading configuration depending on the value of
 environment variable allows you to add your own
-testing configuration in src/birthday/settings.py
+testing configuration in src/ardux/settings.py
 
 """
 
@@ -64,10 +69,27 @@ class AppEngineFlaskTestCase(unittest.TestCase):
         )
 
 
-class ResourceDeviceTestCase(AppEngineFlaskTestCase):
+class CheckInOutTestCase(AppEngineFlaskTestCase):
 
-    def test_assign_device(self):
-        pass
+    def test_api_check_in(self):
+        event_key = ResourceEvent(
+            organizer='administrador@eforcers.com.co',
+            original_start_date_time=datetime.datetime.now(),
+            original_end_date_time=datetime.datetime.now() +
+                                   datetime.timedelta(hours=3),
+            summary='Test event',
+            is_express=False
+        ).put()
+
+        gentlemeet_api = GentleMeetApi()
+        request = gentlemeet_api.insert_training_session.remote.request_type()
+        request.id = event_key.id()
+        gentlemeet_api.check_in(request)
+        checks = CheckInOut.query().fetch()
+        self.assertEqual(1, len(checks), 'Only one check')
+        self.assertEqual(checks[0].type, CHECK_IN, 'Should be check in')
+
+        ndb.delete_multi([event_key, checks[0].key])
 
 
 if __name__ == '__main__':

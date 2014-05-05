@@ -2,6 +2,7 @@ from flask.json import JSONEncoder
 import calendar
 from datetime import datetime
 
+
 class CustomJSONEncoder(JSONEncoder):
 
     def default(self, obj):
@@ -20,7 +21,6 @@ class CustomJSONEncoder(JSONEncoder):
         else:
             return list(iterable)
         return JSONEncoder.default(self, obj)
-
 
 
 class MyEncoder(JSONEncoder):

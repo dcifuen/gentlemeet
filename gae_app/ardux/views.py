@@ -16,6 +16,7 @@ from flask.helpers import url_for
 from flask.templating import render_template
 from ardux.models import ResourceDevice
 import flask
+from models import ResourceEvent, ResourceCalendar
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
 import constants
@@ -196,3 +197,21 @@ def page_error(e):
     logging.error('500 error: %s', e)
     return render_template('500.html'), 500
 
+@app.route('/test/populate/')
+def populate():
+    calendar_key = ResourceCalendar(
+        name='Room 1',
+        email='room1@eforcers.com.co',
+        description='Room for meetings'
+    ).put()
+
+    ResourceEvent(
+        organizer='administrador@eforcers.com.co',
+        original_start_date_time=datetime.datetime.now(),
+        original_end_date_time=datetime.datetime.now() +
+                               datetime.timedelta(hours=3),
+        resource_key=calendar_key,
+        summary='Test event',
+        is_express=False
+    ).put()
+    return 'Populated!'
