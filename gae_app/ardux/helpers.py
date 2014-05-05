@@ -22,7 +22,7 @@ class OAuthDanceHelper:
                  scope=None):
         scope = app.config.get('OAUTH2_SCOPE')
         self.flow = OAuth2WebServerFlow(
-            client_id=app.config.get('OAUTH2_CLIENT_ID'),
+            client_id=constants.OAUTH2_CLIENT_ID,
             client_secret=app.config.get(
                 'OAUTH2_CLIENT_SECRET'),
             scope=scope,

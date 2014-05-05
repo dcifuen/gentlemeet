@@ -1,24 +1,21 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
-from endpoints.api_exceptions import NotFoundException
 import logging
+from api_messages import CheckInOutMessage
+import constants
 
 sys.path.insert(1, os.path.join(os.path.abspath('.'), 'lib'))
 import endpoints
 from protorpc import remote
-from protorpc import messages
+
 import uuid
 from ardux.models import ResourceDevice, ResourceCalendar, ResourceEvent
 
 
-class String(messages.Message):
-    value = messages.StringField(1)
-
-class StringList(messages.Message):
-    items = messages.MessageField(String, 1, repeated=True)
-
-@endpoints.api(name='devices', version='v1', description='ResourceDevice API')
+@endpoints.api(name='devices', version='v1', description='ResourceDevice API',
+               allowed_client_ids=[constants.OAUTH2_CLIENT_ID,
+                                   endpoints.API_EXPLORER_CLIENT_ID])
 class ResourceDeviceApi(remote.Service):
 
     @ResourceDevice.method(path='device',
@@ -62,3 +59,23 @@ class ResourceDeviceApi(remote.Service):
                           name='events.list')
     def CalendarEventList(self, query):
         return query
+
+    @endpoints.method(CheckInOutMessage, CheckInOutMessage,
+                      path='events/checkIn',
+                      name='events.checkIn',
+                      http_method='POST')
+    def check_in(self, request):
+        """
+        Checks a user in a meeting. If the user is already checked in it
+        throws an exception.
+        @param request:
+        @return: Checkin message @raise endpoints.UnauthorizedException: if
+        no OAuth credentials or if there is not a logged in user
+        """
+        current_user = endpoints.get_current_user()
+        if current_user is None:
+            raise endpoints.UnauthorizedException(
+                'Invalid token. Please authenticate first')
+        logging.info('Current user: %s', current_user)
+        #Here goes the actual check in logic
+        return request
