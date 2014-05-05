@@ -6,10 +6,12 @@
 
         <!-- js libraries -->
         <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/moment-with-langs.min.js">
         <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
         <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.10.0/ui-bootstrap.js"></script>
-
+        <script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.10.0/ui-bootstrap-tpls.js"></script>
+        <link rel="author" href="https://github.com/angular-ui/bootstrap/graphs/contributors">
 
         <!-- gentlemeet js -->
         <script src="/static/js/angular/gentlemeet.js"></script>
@@ -49,12 +51,63 @@
                 }
             }
         </script>
+        <!-- Google endpoint js library -->
         <script src="https://apis.google.com/js/client.js?onload=api_init"></script>
 
     </head>
     <body ng-app="gApp">
-         <div ng-controller="testCtrl">
-             asEF
+        <div ng-controller="testCtrl">
+
+            <div class="row">
+                <div class="col-md-4">
+                    <h3 style="text-align: center" >Eventos</h3>
+                    <accordion>
+                        <accordion-group heading="{{event.title}}  {{ event.time }}"
+                                         ng-repeat="event in eventsList">
+                            {{ event.description }}
+                        </accordion-group>
+                    </accordion>
+
+                    <button type="button" class="btn btn-primary disabled
+                    center-block" style="margin-top: 5px;">
+                        Apartar sala
+                    </button>
+
+                </div>
+
+                <div class="col-md-4">
+                    <h1 style="text-align: center">
+                        {{ actual_event.title }}
+                    </h1>
+                    <h1 style="text-align: center">
+                        {{getSecondsAsDate(actual_event.duration) | date:'H:mm:ss'}}
+                    </h1>
+                    <h4 style="text-align: center">
+                        {{ actual_event.description }}
+                    </h4>
+                </div>
+
+                <div class="col-md-4">
+                    <h3 style="text-align: center">Asistentes</h3>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Asistio</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="attendee in actual_event.attendees">
+                                <td>{{ attendee.name }}</td>
+                                <td> <input type="checkbox"
+                                            ng-model="attendee.attended"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                        <img  class="center-block"
+                                src="http://chart.apis.google.com/chart?cht=qr&chs=150x150&chl=asdfasdf&chld=H|0">
+                </div>
+            </div>
 
         </div>
     </body>

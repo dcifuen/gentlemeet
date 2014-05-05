@@ -1,8 +1,6 @@
 
 var modules = [];
-if(window.mode == 'admin'){
-    modules = ['ui.bootstrap'];
-}
+modules = ['ui.bootstrap'];
 
 
 
@@ -135,10 +133,12 @@ gApp.factory('requestNotificationChannel', ['$rootScope', function($rootScope){
     };
 }]);
 
+/*
 gApp.config(function($interpolateProvider) {
 	$interpolateProvider.startSymbol('[[');
 	$interpolateProvider.endSymbol(']]');
 });
+*/
 
 function randomString(length, chars) {
 	if(chars == undefined){
