@@ -53,13 +53,6 @@ class GentleMeetApi(remote.Service):
     def CalendarResourceList(self, query):
         return query
 
-    @ResourceEvent.query_method(query_fields=('limit', 'order', 'pageToken',
-                                              'resource_id'),
-                                path='events',
-                                name='events.list')
-    def CalendarEventList(self, query):
-        return query
-
     @endpoints.method(ID_RESOURCE, CheckInOutMessage,
                       path='events/{id}/checkin',
                       name='events.checkIn',
@@ -111,43 +104,55 @@ class GentleMeetApi(remote.Service):
             return CheckInOutMessage(userEmail=current_user.email())
 
 
-        @endpoints.method(ID_RESOURCE, CheckInOutMessage,
-                          path='event/{id}/checkout',
-                          name='event.checkOut',
-                          http_method='POST')
-        def check_out(self, request):
-            """
-            Checks a user out of a meeting. If there is not a logged in user
-            throws an exception. If the event doesn't exists throws an exception. If
-            the user has already checked out throws an exception. If the user hasn't
-            checked in throws an exception.
-            """
-            current_user = endpoints.get_current_user()
-            if current_user is None:
-                raise endpoints.UnauthorizedException(
-                    'Invalid token. Please authenticate first')
+    @endpoints.method(ID_RESOURCE, CheckInOutMessage,
+                      path='event/{id}/checkout',
+                      name='event.checkOut',
+                      http_method='POST')
+    def check_out(self, request):
+        """
+        Checks a user out of a meeting. If there is not a logged in user
+        throws an exception. If the event doesn't exists throws an exception. If
+        the user has already checked out throws an exception. If the user hasn't
+        checked in throws an exception.
+        """
+        current_user = endpoints.get_current_user()
+        if current_user is None:
+            raise endpoints.UnauthorizedException(
+                'Invalid token. Please authenticate first')
 
-            logging.info('Checking out user: [%s] event ID: [%s]',
-                         current_user, request.id)
+        logging.info('Checking out user: [%s] event ID: [%s]',
+                     current_user, request.id)
 
-            event = ResourceEvent.get_by_id(request.id)
-            if not event:
-                raise endpoints.BadRequestException(
-                    'Unable to find event with id %s' % request.id)
+        event = ResourceEvent.get_by_id(request.id)
+        if not event:
+            raise endpoints.BadRequestException(
+                'Unable to find event with id %s' % request.id)
 
-            if CheckInOut.already_checked(constants.CHECK_OUT, current_user
-                    .email(), event):
-                raise endpoints.BadRequestException(
-                    'User have already checked out')
+        if CheckInOut.already_checked(constants.CHECK_OUT, current_user
+                .email(), event):
+            raise endpoints.BadRequestException(
+                'User have already checked out')
 
-            if not CheckInOut.checked_in_before(current_user.email(), event,
-                                                datetime.datetime.now()):
-                raise endpoints.BadRequestException(
-                    'The user did not checked in or checked in the future')
+        if not CheckInOut.checked_in_before(current_user.email(), event,
+                                            datetime.datetime.now()):
+            raise endpoints.BadRequestException(
+                'The user did not checked in or checked in the future')
 
-            # TODO: Check if the event should be marked as finished
+        # TODO: Check if the event should be marked as finished
 
-            CheckInOut(parent=event.key, attendee=current_user.email(),
-                       type=constants.CHECK_OUT).put()
+        CheckInOut(parent=event.key, attendee=current_user.email(),
+                   type=constants.CHECK_OUT).put()
 
-            return CheckInOutMessage(userEmail=current_user.email())
+        return CheckInOutMessage(userEmail=current_user.email())
+
+
+    @endpoints.method(ID_RESOURCE, CheckInOutMessage,
+                  path='resource/{id}/events/today',
+                  name='resource.eventsToday',
+                  http_method='GET')
+    def events_today(self, request):
+        """
+        Retrieves the list of events that are taking place in a resource during
+        the day
+        """
+        return CheckInOutMessage

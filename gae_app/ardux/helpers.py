@@ -139,6 +139,17 @@ class CalendarHelper(OAuthServiceHelper):
         page_token = None
         while True:
             if page_token:
+                """
+                now = datetime.datetime.now()
+        events = calendar_service.events().list(**{
+                'calendarId': cherrypy.config['google.calendar.id'],
+                'timeMin': datetime.datetime(now.year, now.month, now.day).isoformat() + '.0z',
+                'timeMax': datetime.datetime(now.year, now.month, now.day, 23, 59, 59).isoformat() + '.0z',
+                'singleEvents': True,
+                'orderBy': 'startTime'
+            }).execute()
+"""
+
                 tem_events = self.service.events().list(calendarId=calendar_id, pageToken=page_token, **kwargs).execute()
             else:
                 tem_events = self.service.events().list(calendarId=calendar_id, **kwargs).execute()
