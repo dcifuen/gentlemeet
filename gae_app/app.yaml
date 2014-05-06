@@ -25,16 +25,16 @@ inbound_services:
 - warmup
 
 error_handlers:
-  - file: ardux/static/html/default_error.html
+  - file: ardux/errors/default_error.html
 
   - error_code: over_quota
-    file: ardux/static/html/over_quota.html
+    file: ardux/errors/over_quota.html
 
   - error_code: dos_api_denial
-    file: ardux/static/html/dos.html
+    file: ardux/errors/dos.html
 
   - error_code: timeout
-    file: ardux/static/html/timeout.html
+    file: ardux/errors/timeout.html
 
 handlers:
 - url: /favicon.ico
