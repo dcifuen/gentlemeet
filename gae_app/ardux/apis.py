@@ -6,14 +6,18 @@ import uuid
 import endpoints
 from protorpc import remote
 
-from api_messages import CheckInOutMessage, ID_RESOURCE
+from api_messages import CheckInOutMessage, ID_RESOURCE, EventsResponseMessage, \
+    EventMessage, EventStateEnum
 import constants
 from ardux.models import ResourceDevice, ResourceCalendar, ResourceEvent, \
     CheckInOut, store_check_in
 
 
 @endpoints.api(name='gentlemeet', version='v1',
-               description='GentleMeet API',
+               documentation='http://docs.gentlemeet.com',
+               title='GentleMeet API',
+               description='Backend API for managing rooms and meetings with '
+                           'GentleMeet',
                allowed_client_ids=[constants.OAUTH2_CLIENT_ID,
                                    endpoints.API_EXPLORER_CLIENT_ID])
 class GentleMeetApi(remote.Service):
@@ -128,8 +132,8 @@ class GentleMeetApi(remote.Service):
             raise endpoints.BadRequestException(
                 'Unable to find event with id %s' % request.id)
 
-        if CheckInOut.already_checked(constants.CHECK_OUT, current_user
-                .email(), event):
+        if CheckInOut.already_checked(constants.CHECK_OUT, current_user.email(),
+                                      event):
             raise endpoints.BadRequestException(
                 'User have already checked out')
 
@@ -146,13 +150,32 @@ class GentleMeetApi(remote.Service):
         return CheckInOutMessage(userEmail=current_user.email())
 
 
-    @endpoints.method(ID_RESOURCE, CheckInOutMessage,
-                  path='resource/{id}/events/today',
-                  name='resource.eventsToday',
-                  http_method='GET')
+    @endpoints.method(ID_RESOURCE, EventsResponseMessage,
+                      path='resource/{id}/events/today',
+                      name='resource.eventsToday',
+                      http_method='GET')
     def events_today(self, request):
         """
         Retrieves the list of events that are taking place in a resource during
-        the day
+        the day. If the resource doesn't exists throws an exception.
         """
-        return CheckInOutMessage
+        logging.info('Getting daily events for resource ID: [%s]',
+                     request.id)
+
+        resource = ResourceCalendar.get_by_id(request.id)
+        if not resource:
+            raise endpoints.BadRequestException(
+                'Unable to find resource with id %s' % request.id)
+
+        items = []
+        for resource_event in resource.get_today_events():
+            items.append(EventMessage(
+                id=resource_event.id(),
+                title=resource_event.title,
+                summary=resource_event.summary,
+                organizer=resource_event.organizer,
+                start_date_time=resource_event.start_date_time,
+                end_date_time=resource_event.end_date_time,
+                attendees=resource_event.attendees,
+                state=EventStateEnum.get_by_constant(resource_event.state)
+            ))

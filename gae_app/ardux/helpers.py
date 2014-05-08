@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # vim: set fileencoding=utf-8
 
 import logging
@@ -38,59 +38,72 @@ class OAuthDanceHelper:
     def get_credentials(self, credentials_json):
         return Credentials.new_from_json(credentials_json)
 
+
 class OAuthServiceHelper:
     """ OAuth services base helper class"""
     credentials = None
     service = None
 
-    def __init__(self, credentials_json, refresh_token = None):
+    def __init__(self, credentials_json, refresh_token=None):
         oOAuthHelper = OAuthDanceHelper()
         self.credentials = oOAuthHelper.get_credentials(credentials_json)
         if refresh_token and self.credentials.refresh_token is None:
             self.credentials.refresh_token = refresh_token
         self.http = self.credentials.authorize(httplib2.Http())
 
+
 class CalendarResourceHelper(OAuthServiceHelper):
-    def __init__(self, credentials_json, refresh_token = None, domain = None):
+    def __init__(self, credentials_json, refresh_token=None, domain=None):
         OAuthServiceHelper.__init__(self, credentials_json, refresh_token)
         auth2token = gdata.gauth.OAuth2TokenFromCredentials(self.credentials)
-        self.client = CalendarResourceClient(domain=domain, auth_token=self.credentials.access_token)
+        self.client = CalendarResourceClient(
+            domain=domain, auth_token=self.credentials.access_token)
         self.client = auth2token.authorize(self.client)
 
     def get_all_resources(self):
         return self.client.GetResourceFeed().entry
 
+
 class CalendarHelper(OAuthServiceHelper):
     """ Google Calendar API helper class"""
 
-    def __init__(self, credentials_json, refresh_token = None):
+    def __init__(self, credentials_json, refresh_token=None):
         OAuthServiceHelper.__init__(self, credentials_json, refresh_token)
         self.service = build('calendar', 'v3', http=self.http)
 
 
-    def delete_calentar_event(self,calendar_id, envent_id):
+    def delete_calentar_event(self, calendar_id, envent_id):
         self.service.events().delete(
             calendarId=calendar_id,
             eventId=envent_id,
             sendNotifications=True,
         ).execute()
 
-    def add_event_attendees(self, calendar_id, envent_id, attendees = []):
-        event = {'id':envent_id}
-        attendees_list = [{'email':attendee} for attendee in attendees]
-        event.update({'attendees':attendees_list})
-        return self.service.events().update(calendarId=calendar_id, eventId=event['id'], body=event).execute()
+    def add_event_attendees(self, calendar_id, envent_id, attendees=[]):
+        event = {'id': envent_id}
+        attendees_list = [{'email': attendee} for attendee in attendees]
+        event.update({'attendees': attendees_list})
+        return self.service.events().update(calendarId=calendar_id,
+                                            eventId=event['id'],
+                                            body=event).execute()
 
-    def update_calendar_event(self,calendar_id, envent_id, summary, start_date, end_date):
-        event = {'id':envent_id}
-        event.update({'start':{'dateTime': start_date.strftime(constants
-                                                               .CALENDAR_DATE_FORMAT),
-                               'timeZone': "UTC"}})
-        event.update({'end':{'dateTime': end_date.strftime(constants
-                                                           .CALENDAR_DATE_FORMAT),
-                             'timeZone': "UTC"}})
-        event.update({'summary':summary})
-        return self.service.events().update(calendarId=calendar_id, eventId=event['id'], body=event).execute()
+    def update_calendar_event(self, calendar_id, envent_id, summary, start_date,
+                              end_date):
+        event = {'id': envent_id}
+        event.update({
+            'start': {'dateTime': start_date.strftime(
+                constants.CALENDAR_DATE_FORMAT),
+                      'timeZone': "UTC"}
+        })
+        event.update({
+            'end': {'dateTime': end_date.strftime(
+                constants.CALENDAR_DATE_FORMAT),
+                    'timeZone': "UTC"}
+        })
+        event.update({'summary': summary})
+        return self.service.events().update(calendarId=calendar_id,
+                                            eventId=event['id'],
+                                            body=event).execute()
 
 
     def insert_or_update_event(self, calendar_id, summary, start_date,
@@ -108,9 +121,11 @@ class CalendarHelper(OAuthServiceHelper):
         if location:
             event.update({'location': location})
         event.update({'attendees': attendees_list})
-        event.update({'start': {'dateTime':start_date.strftime(constants.CALENDAR_DATE_FORMAT)}})
-        event.update({'end': {'dateTime':end_date.strftime(constants.CALENDAR_DATE_FORMAT)}})
-        event.update({'summary':summary})
+        event.update({'start': {
+        'dateTime': start_date.strftime(constants.CALENDAR_DATE_FORMAT)}})
+        event.update({
+        'end': {'dateTime': end_date.strftime(constants.CALENDAR_DATE_FORMAT)}})
+        event.update({'summary': summary})
         if event_id:
             return self.service.events().update(calendarId=calendar_id,
                                                 sendNotifications=True,
@@ -121,13 +136,12 @@ class CalendarHelper(OAuthServiceHelper):
                                                 sendNotifications=True,
                                                 body=event).execute()
 
-
     def is_calendar_available(self, calendar_id, start_date, end_date):
-        response = self.service.freebusy().query(body={'timeMin': start_date
-                                    .strftime(constants.CALENDAR_DATE_FORMAT),
-                                    'timeMax': end_date.strftime(constants.CALENDAR_DATE_FORMAT),
-                                    'items': [{'id': calendar_id}]
-                                    }).execute()
+        response = self.service.freebusy().query(
+            body={'timeMin': start_date.strftime(constants.CALENDAR_DATE_FORMAT),
+                  'timeMax': end_date.strftime(constants.CALENDAR_DATE_FORMAT),
+                  'items': [{'id': calendar_id}]
+        }).execute()
         return len(response['calendars'][calendar_id]['busy']) == 0
 
     def get_event(self, calendar_id, even_id):
@@ -137,22 +151,21 @@ class CalendarHelper(OAuthServiceHelper):
     def list_events(self, calendar_id, **kwargs):
         events = []
         page_token = None
+        #TODO: Pagination the right way
         while True:
             if page_token:
-                """
-                now = datetime.datetime.now()
-        events = calendar_service.events().list(**{
-                'calendarId': cherrypy.config['google.calendar.id'],
-                'timeMin': datetime.datetime(now.year, now.month, now.day).isoformat() + '.0z',
-                'timeMax': datetime.datetime(now.year, now.month, now.day, 23, 59, 59).isoformat() + '.0z',
-                'singleEvents': True,
-                'orderBy': 'startTime'
-            }).execute()
-"""
-
-                tem_events = self.service.events().list(calendarId=calendar_id, pageToken=page_token, **kwargs).execute()
+                tem_events = self.service.events().list(
+                    calendarId=calendar_id,
+                    pageToken=page_token,
+                    singleEvents=True,
+                    orderBy='startTime',
+                    **kwargs).execute()
             else:
-                tem_events = self.service.events().list(calendarId=calendar_id, **kwargs).execute()
+                tem_events = self.service.events().list(
+                    calendarId=calendar_id,
+                    singleEvents=True,
+                    orderBy='startTime',
+                    **kwargs).execute()
             events.extend(tem_events['items'])
             page_token = tem_events.get('nextPageToken')
             if not page_token:

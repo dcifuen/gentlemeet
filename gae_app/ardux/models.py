@@ -52,10 +52,11 @@ class User(ndb.Model):
 # *********** API Models ***************
 
 class ResourceCalendar(EndpointsModel):
-    _message_fields_schema = ('id', 'name', 'email', 'description', 'type')
     """A replica of the actual Google Calendar resource, but with more
     information and relation with devices
     """
+    _message_fields_schema = ('id', 'name', 'email', 'description', 'type')
+
     name = ndb.StringProperty(required=True, indexed=False)
     email = ndb.StringProperty(indexed=False)
     description = ndb.StringProperty(indexed=False)
@@ -65,20 +66,32 @@ class ResourceCalendar(EndpointsModel):
     def id(self):
         return self.key.id()
 
+    def get_today_events(self):
+        today = datetime.datetime.today()
+        today_start = datetime.datetime.combine(
+            today, datetime.datetime.min.time())
+        today_end = datetime.datetime.combine(
+            today, datetime.datetime.max.time())
+        return ResourceEvent.query(
+            ResourceEvent.original_start_date_time > today_start,
+            ResourceEvent.original_end_date_time < today_end,
+            ResourceEvent.resource_key == self.key
+        ).fetch()
+
 
 class ResourceDevice(EndpointsModel):
     """The representation of the physical or web device that is at the
     calendar resource.
     """
     _message_fields_schema = (
-    'name', 'uuid', 'uuid_query', 'type', 'state', 'last_sync', 'online',
-    'resource_id', 'resource')
+        'name', 'uuid', 'uuid_query', 'type', 'state', 'last_sync', 'online',
+        'resource_id', 'resource')
 
     name = ndb.StringProperty()
     uuid = ndb.StringProperty(required=True)
     type = ndb.StringProperty(choices=constants.DEVICE_CHOICES,
                               required=True, indexed=False)
-    #TODO: Refactor states to use Fysom
+    # TODO: Refactor states to use Fysom
     state = ndb.StringProperty(choices=constants.DEVICE_STATE_CHOICES,
                                indexed=False)
     last_sync = ndb.DateTimeProperty(auto_now_add=True)
@@ -146,15 +159,15 @@ class ResourceEvent(EndpointsModel):
     and sync purposes. All day or recurrent events are not supported
     """
     organizer = ndb.StringProperty(indexed=False)
-    original_start_date_time = ndb.DateTimeProperty(required=True,
-                                                    indexed=False)
-    original_end_date_time = ndb.DateTimeProperty(required=True, indexed=False)
+    original_start_date_time = ndb.DateTimeProperty(required=True)
+    original_end_date_time = ndb.DateTimeProperty(required=True)
     actual_start_date_time = ndb.DateTimeProperty(indexed=False)
     actual_end_date_time = ndb.DateTimeProperty(indexed=False)
     actual_attendees = ndb.StringProperty(repeated=True, indexed=False)
     yes_attendees = ndb.StringProperty(repeated=True, indexed=False)
     no_attendees = ndb.StringProperty(repeated=True, indexed=False)
     maybe_attendees = ndb.StringProperty(repeated=True, indexed=False)
+    no_response_attendees = ndb.StringProperty(repeated=True, indexed=False)
     resource_key = ndb.KeyProperty(ResourceCalendar)
     title = ndb.StringProperty(indexed=False)
     summary = ndb.StringProperty(indexed=False)
@@ -172,6 +185,20 @@ class ResourceEvent(EndpointsModel):
             return self.resource_key.id()
         else:
             return None
+
+    @property
+    def start_date_time(self):
+        return self.actual_start_date_time if self.actual_start_date_time else self.original_start_date_time
+
+    @property
+    def end_date_time(self):
+        return self.actual_end_date_time if self.actual_end_date_time else self.original_end_date_time
+
+    @property
+    def attendees(self):
+        return list(set(self.actual_attendees + self.yes_attendees +
+                        self.no_attendees + self.maybe_attendees +
+                        self.no_response_attendees))
 
 
 class CheckInOut(EndpointsModel):
