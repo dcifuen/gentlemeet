@@ -207,11 +207,14 @@ def populate():
 
     ResourceEvent(
         organizer='administrador@eforcers.com.co',
-        original_start_date_time=datetime.datetime.now(),
+        original_start_date_time=datetime.datetime.now() +
+                               datetime.timedelta(minutes=5),
         original_end_date_time=datetime.datetime.now() +
                                datetime.timedelta(hours=3),
         resource_key=calendar_key,
-        summary='Test event',
+        summary='Test event summary',
+        title='Test event',
+        state=constants.STATE_SCHEDULED,
         is_express=False
     ).put()
     return 'Populated!'

@@ -7,7 +7,7 @@ import endpoints
 from protorpc import remote
 
 from api_messages import CheckInOutMessage, ID_RESOURCE, EventsResponseMessage, \
-    EventMessage, EventStateEnum, event_db_to_rcp
+    EventMessage, event_db_to_rcp
 import constants
 from ardux.models import ResourceDevice, ResourceCalendar, ResourceEvent, \
     CheckInOut, store_check_in

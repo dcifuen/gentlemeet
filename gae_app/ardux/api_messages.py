@@ -9,15 +9,15 @@ import constants
 def event_db_to_rcp(resource_event):
     """ Converts datastore ResourceEvent entity to RPC EventMessage object """
     return EventMessage(
-                id=resource_event.id(),
-                title=resource_event.title,
-                summary=resource_event.summary,
-                organizer=resource_event.organizer,
-                start_date_time=resource_event.start_date_time,
-                end_date_time=resource_event.end_date_time,
-                attendees=resource_event.attendees,
-                state=EnumHelpers.EventStateFromString(resource_event.state)
-            )
+        id=resource_event.id,
+        title=resource_event.title,
+        summary=resource_event.summary,
+        organizer=resource_event.organizer,
+        start_date_time=resource_event.start_date_time,
+        end_date_time=resource_event.end_date_time,
+        attendees=resource_event.attendees,
+        state=EnumHelpers.EventStateFromString(resource_event.state)
+    )
 
 class EnumHelpers:
 
@@ -51,9 +51,6 @@ class EventMessage(messages.Message):
     start_date_time = message_types.DateTimeField(5, required=True)
     end_date_time = message_types.DateTimeField(6, required=True)
     attendees = messages.StringField(7, repeated=True)
-
-
-
     state = messages.EnumField(EventStateEnum, 8,
                                default=EventStateEnum.SCHEDULED)
 

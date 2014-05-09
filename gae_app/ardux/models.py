@@ -72,19 +72,23 @@ class ResourceCalendar(EndpointsModel):
             today, datetime.datetime.min.time())
         today_end = datetime.datetime.combine(
             today, datetime.datetime.max.time())
+        # TODO: Cache the daily events results?
+        #Since two inequality filters are not possible, get today events
         return ResourceEvent.query(
             ResourceEvent.original_start_date_time > today_start,
-            ResourceEvent.original_end_date_time < today_end,
+            ResourceEvent.original_start_date_time < today_end,
             ResourceEvent.resource_key == self.key
         ).fetch()
 
     def get_current_event(self):
+        #Since two inequality filters are not possible, have to filter in memory
+        today_events = self.get_today_events()
         now = datetime.datetime.now()
-        return ResourceEvent.query(
-            ResourceEvent.original_start_date_time < now,
-            ResourceEvent.original_end_date_time > now,
-            ResourceEvent.resource_key == self.key
-        ).get()
+        for event in today_events:
+            if (event.original_start_date_time < now <
+                    event.original_end_date_time):
+                return event
+        return None
 
 
 class ResourceDevice(EndpointsModel):
