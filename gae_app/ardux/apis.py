@@ -7,7 +7,7 @@ import endpoints
 from protorpc import remote
 
 from api_messages import CheckInOutMessage, ID_RESOURCE, EventsResponseMessage, \
-    EventMessage, EventStateEnum
+    EventMessage, EventStateEnum, event_db_to_rcp
 import constants
 from ardux.models import ResourceDevice, ResourceCalendar, ResourceEvent, \
     CheckInOut, store_check_in
@@ -169,13 +169,30 @@ class GentleMeetApi(remote.Service):
 
         items = []
         for resource_event in resource.get_today_events():
-            items.append(EventMessage(
-                id=resource_event.id(),
-                title=resource_event.title,
-                summary=resource_event.summary,
-                organizer=resource_event.organizer,
-                start_date_time=resource_event.start_date_time,
-                end_date_time=resource_event.end_date_time,
-                attendees=resource_event.attendees,
-                state=EventStateEnum.get_by_constant(resource_event.state)
-            ))
+            items.append(event_db_to_rcp(resource_event))
+        return EventsResponseMessage(items=items)
+
+
+    @endpoints.method(ID_RESOURCE, EventMessage,
+                      path='resource/{id}/events/current',
+                      name='resource.eventCurrent',
+                      http_method='GET')
+    def current_event(self, request):
+        """
+        Retrieves the current event that is taking place at this moment in the
+        resource. If the resource doesn't exists throws an exception. If
+        there is no event happening right now throws an exception.
+        """
+        logging.info('Getting the current event happening in resource ID: [%s]',
+                     request.id)
+
+        resource = ResourceCalendar.get_by_id(request.id)
+        if not resource:
+            raise endpoints.BadRequestException(
+                'Unable to find resource with id %s' % request.id)
+
+        resource_event = resource.get_current_event()
+        if not resource_event:
+            raise endpoints.BadRequestException(
+                'There is no event happening at the resource now')
+        return event_db_to_rcp(resource_event)

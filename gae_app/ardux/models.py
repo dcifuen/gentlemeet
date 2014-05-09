@@ -78,6 +78,14 @@ class ResourceCalendar(EndpointsModel):
             ResourceEvent.resource_key == self.key
         ).fetch()
 
+    def get_current_event(self):
+        now = datetime.datetime.now()
+        return ResourceEvent.query(
+            ResourceEvent.original_start_date_time < now,
+            ResourceEvent.original_end_date_time > now,
+            ResourceEvent.resource_key == self.key
+        ).get()
+
 
 class ResourceDevice(EndpointsModel):
     """The representation of the physical or web device that is at the
