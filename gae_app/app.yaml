@@ -53,6 +53,10 @@ handlers:
   static_files: ardux/static/html/web_client.html
   upload: ardux/static/html/web_client.html
 
+- url: /client/web/checkin
+  static_files: ardux/static/html/checkin.html
+  upload: ardux/static/html/checkin.html
+
 - url: /gae_mini_profiler/static
   static_dir: lib/gae_mini_profiler/static
 

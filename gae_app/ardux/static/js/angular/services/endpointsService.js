@@ -57,6 +57,13 @@ gApp.service('EndpointsService', function ($q, $rootScope, $http, $window, reque
         }, apiRoot);
     };
 
+    service.authorize = function(client_id, scopes, auth_callback){
+        gapi.auth.authorize(
+            {client_id: client_id, scope: scopes, immediate: true},
+            auth_callback
+        );
+    }
+
     $window.api_load = function (api, version) {
         requestNotificationChannel.requestStarted();
         service.loadService(api, version, function () {

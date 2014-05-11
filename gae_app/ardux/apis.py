@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 import uuid
 
@@ -84,7 +84,7 @@ class GentleMeetApi(remote.Service):
                 'User have already checked in')
 
         # Check time stuff
-        now = datetime.datetime.now()
+        now = datetime.now()
 
         if event.actual_end_date_time and event.actual_end_date_time < now:
             raise endpoints.BadRequestException(
@@ -93,7 +93,7 @@ class GentleMeetApi(remote.Service):
         if (not event.actual_start_date_time and event.state == constants
                 .STATE_SCHEDULED):
             if (event.original_start_date_time < now or
-                event.original_start_date_time - datetime.timedelta(
+                event.original_start_date_time - timedelta(
                     minutes=constants.EARLY_CHECK_IN_MINUTES) < now):
                 #Event should be marked as started
                 event.actual_start_date_time = now
