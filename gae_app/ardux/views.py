@@ -217,4 +217,9 @@ def populate():
         state=constants.STATE_SCHEDULED,
         is_express=False
     ).put()
+
+    ResourceDevice(
+        name="DeviceTest", uuid="1", type=constants.TYPE_WEB,
+        resource_key=calendar_key, state=constants.STATE_ACTIVE
+    ).put()
     return 'Populated!'
