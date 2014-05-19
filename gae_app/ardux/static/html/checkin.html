@@ -8,7 +8,8 @@
 
         <!-- js libraries -->
         <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/moment-with-langs.min.js">
+        <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/moment-with-langs.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
         <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.10.0/ui-bootstrap.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.10.0/ui-bootstrap-tpls.js"></script>
@@ -38,7 +39,7 @@
             function api_init() {
                 console.log("Initializing Endpoints Service");
                 window.apis = [
-                    {name: 'gentlemeet', version: 'v1'}
+                    {name: 'gentlemeet', version: 'v1'},
                 ];
 
                 if (window.api_load && !window.loading_apis) {

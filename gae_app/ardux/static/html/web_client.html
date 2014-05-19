@@ -64,9 +64,9 @@
                 <div class="col-md-4">
                     <h3 style="text-align: center" >Eventos</h3>
                     <accordion>
-                        <accordion-group heading="{{event.title}}  {{ event.time }}"
+                        <accordion-group heading="{{event.title}} {{ event.start_date_time|date:'yyyy-MM-dd HH:mm:ss'}}"
                                          ng-repeat="event in eventsList">
-                            {{ event.description }}
+                            {{ event.summary }}
                         </accordion-group>
                     </accordion>
 
@@ -106,8 +106,10 @@
                             </tr>
                         </tbody>
                     </table>
-                        <img  class="center-block"
-                                src="http://chart.apis.google.com/chart?cht=qr&chs=150x150&chl=asdfasdf&chld=H|0">
+                    <a href="{{ getCheckinURL(false) }}">
+                        <img  class="center-block" src="
+                        {{ getCheckinURL(true) }}">
+                    </a>
                 </div>
             </div>
 

@@ -59,7 +59,7 @@ gApp.service('EndpointsService', function ($q, $rootScope, $http, $window, reque
 
     service.authorize = function(client_id, scopes, auth_callback){
         gapi.auth.authorize(
-            {client_id: client_id, scope: scopes, immediate: true},
+            {client_id: client_id, scope: scopes, immediate: false},
             auth_callback
         );
     }

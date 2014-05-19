@@ -4,30 +4,34 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
     };
 
     $scope.countdownTimer = null;
+    $scope.calendarId = 5629499534213120; //Should be device Id
 
     $scope.$on(endpointsService.ENDPOINTS_READY, function () {
         //load tags
         console.log("Endpoints ready...");
 
 
-        endpointsService.getDevice({}, function (response) {
-            console.log(response);
-
-            $scope.actual_event = {
-                'title':'Event1',
-                'time':'02:30 pm',
-                'description': 'prueba1',
-                'duration':300,
-                'attendees':[
-                    {'name':'Santiago','attended':true},
-                    {'name':'David','attended':true},
-                    {'name':'Carlos','attended':true},
-                    {'name':'Jorge','attended':false}
-                ]
+        endpointsService.eventsTodayResource ({'id':$scope.calendarId},
+            function (response) {
+                console.log('get list Events ',response);
+                $scope.eventsList = response.items;
             }
+        );
 
-            $scope.countdownTimer  = $timeout($scope.onTimeout, 1000);
-        });
+
+        endpointsService.eventCurrentResource({'id':$scope.calendarId},
+            function(response){
+                console.log('get Actual Event',response);
+                console.log('get Actual Event start',response.start_date_time);
+                console.log('get Actual Event end',response.end_date_time);
+                var startTime = new Date(response.start_date_time);
+                var endTime = new Date(response.end_date_time);
+                response.duration = (endTime - startTime) / (60 * 1000)
+                response.checkinURL = '';
+                $scope.actual_event = response;
+                $scope.countdownTimer  = $timeout($scope.onTimeout, 1000);
+            }
+        );
     });
 
     $scope.onTimeout = function(){
@@ -43,10 +47,13 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
         isFirstDisabled: false
     };
 
-    $scope.eventsList = [
-        {'title':'Event1', 'time':'02:30 pm', 'description': 'prueba1'},
-        {'title':'Event2', 'time':'03:30 pm', 'description': 'prueba2'},
-        {'title':'Event2', 'time':'04:30 pm', 'description': 'prueba3'},
-    ];
+    $scope.getCheckinURL = function(isQR){
+        var checkinURL = "/client/web/checkin?event_id=" +$scope.actual_event.id;
+        if(isQR){
+            checkinURL = window.location.protocol + window.api_host + checkinURL;
+            return 'http://chart.apis.google.com/chart?cht=qr&chs=150x150&chl='+checkinURL+'&chld=H|0';
+        }else
+            return checkinURL;
+    }
 
 }]);
