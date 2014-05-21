@@ -58,7 +58,7 @@ class GentleMeetApi(remote.Service):
         return query
 
     @endpoints.method(ID_RESOURCE, CheckInOutMessage,
-                      path='events/{id}/checkin',
+                      path='events/{id}/checkIn',
                       name='events.checkIn',
                       http_method='POST')
     def check_in(self, request):
@@ -109,7 +109,7 @@ class GentleMeetApi(remote.Service):
 
 
     @endpoints.method(ID_RESOURCE, CheckInOutMessage,
-                      path='event/{id}/checkout',
+                      path='event/{id}/checkOut',
                       name='event.checkOut',
                       http_method='POST')
     def check_out(self, request):
@@ -195,4 +195,49 @@ class GentleMeetApi(remote.Service):
         if not resource_event:
             raise endpoints.BadRequestException(
                 'There is no event happening at the resource now')
+        return event_db_to_rcp(resource_event)
+
+
+    @endpoints.method(ID_RESOURCE, EventMessage,
+                      path='resource/{id}/events/quickAdd',
+                      name='resource.quickAdd',
+                      http_method='POST')
+    def book_resource(self, request):
+        """
+        Let a user book a resource in the moment, checks in the user. If the
+        resource doesn't exists throws an exception. If there is an event
+        happening throws an exception.
+        """
+        current_user = endpoints.get_current_user()
+        if current_user is None:
+            raise endpoints.UnauthorizedException(
+                'Invalid token. Please authenticate first')
+
+        logging.info('User [%s] is creating a quick event at [%s]',
+                     current_user, request.id)
+
+        resource = ResourceCalendar.get_by_id(request.id)
+        if not resource:
+            raise endpoints.BadRequestException(
+                'Unable to find resource with id %s' % request.id)
+
+        if not resource.will_be_available(constants.QUICK_ADD_MINUTES):
+            raise endpoints.BadRequestException(
+                'There is an event happening at the resource')
+
+        now = datetime.datetime.now()
+        end_time = now + datetime.timedelta(minutes=constants.QUICK_ADD_MINUTES)
+        #TODO: Create event in Google Calendar
+        resource_event = ResourceEvent(
+            organizer=current_user.email(),
+            original_start_date_time=now,
+            original_end_date_time=end_time,
+            actual_start_date_time=now,
+            resource_key=resource.key,
+            title=constants.QUICK_ADD_TITLE,
+            is_express=True,
+            state=constants.STATE_IN_PROGRESS,
+            #event_id=
+        ).put()
+        store_check_in(resource_event, current_user.email())
         return event_db_to_rcp(resource_event)

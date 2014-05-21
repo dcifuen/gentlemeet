@@ -90,6 +90,17 @@ class ResourceCalendar(EndpointsModel):
                 return event
         return None
 
+    def will_be_available(self, minutes):
+        #Check that the resource is available or not in the given minutes
+        today_events = self.get_today_events()
+        now = datetime.datetime.now()
+        end_time = now + datetime.timedelta(minutes=minutes)
+        for event in today_events:
+            if (event.start_date_time < now < event.end_date_time or
+                    event.start_date_time < end_time < event.end_date_time):
+                return False
+        return True
+
 
 class ResourceDevice(EndpointsModel):
     """The representation of the physical or web device that is at the
@@ -186,6 +197,8 @@ class ResourceEvent(EndpointsModel):
     is_express = ndb.BooleanProperty(indexed=False)
     state = ndb.StringProperty(choices=constants.EVENT_STATE_CHOICES,
                                indexed=False)
+    #Google Calendar event ID
+    event_id = ndb.StringProperty(indexed=False)
 
     def ResourceSet(self, value):
         if value:
