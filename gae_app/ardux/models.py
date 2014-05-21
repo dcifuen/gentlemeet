@@ -212,6 +212,14 @@ class ResourceEvent(EndpointsModel):
                         self.no_attendees + self.maybe_attendees +
                         self.no_response_attendees))
 
+    @property
+    def remaining_time(self):
+        now = datetime.datetime.now()
+        if (self.state == constants.STATE_IN_PROGRESS and
+                self.original_end_date_time and self.original_end_date_time > now):
+            return int((self.original_end_date_time - now).total_seconds())
+        return None
+
 
 class CheckInOut(EndpointsModel):
     """Records the check ins and check outs of the attendees and based on that

@@ -15,14 +15,19 @@ def event_db_to_rcp(resource_event):
         organizer=resource_event.organizer,
         start_date_time=resource_event.start_date_time,
         end_date_time=resource_event.end_date_time,
-        attendees=resource_event.attendees,
+        remaining_time=resource_event.remaining_time,
+        actual_attendees=resource_event.actual_attendees,
+        yes_attendees=resource_event.yes_attendees,
+        no_attendees=resource_event.no_attendees,
+        maybe_attendees=resource_event.maybe_attendees,
+        no_response_attendees=resource_event.no_response_attendees,
         state=EnumHelpers.EventStateFromString(resource_event.state)
     )
 
-class EnumHelpers:
 
+class EnumHelpers:
     @classmethod
-    def EventStateFromString(clazz, str):
+    def EventStateFromString(cls, str):
         return {
             constants.STATE_SCHEDULED: EventMessage.EventStateEnum.SCHEDULED,
             constants.STATE_IN_PROGRESS: EventMessage.EventStateEnum.IN_PROGRESS,
@@ -36,7 +41,6 @@ class CheckInOutMessage(messages.Message):
 
 
 class EventMessage(messages.Message):
-
     class EventStateEnum(messages.Enum):
         SCHEDULED = 1
         IN_PROGRESS = 2
@@ -50,8 +54,13 @@ class EventMessage(messages.Message):
     organizer = messages.StringField(4)
     start_date_time = message_types.DateTimeField(5, required=True)
     end_date_time = message_types.DateTimeField(6, required=True)
-    attendees = messages.StringField(7, repeated=True)
-    state = messages.EnumField(EventStateEnum, 8,
+    remaining_time = messages.IntegerField(7)
+    actual_attendees = messages.StringField(8, repeated=True)
+    yes_attendees = messages.StringField(9, repeated=True)
+    no_attendees = messages.StringField(10, repeated=True)
+    maybe_attendees = messages.StringField(11, repeated=True)
+    no_response_attendees = messages.StringField(12, repeated=True)
+    state = messages.EnumField(EventStateEnum, 13,
                                default=EventStateEnum.SCHEDULED)
 
 

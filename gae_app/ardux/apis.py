@@ -93,8 +93,8 @@ class GentleMeetApi(remote.Service):
         if (not event.actual_start_date_time and event.state == constants
                 .STATE_SCHEDULED):
             if (event.original_start_date_time < now or
-                event.original_start_date_time - timedelta(
-                    minutes=constants.EARLY_CHECK_IN_MINUTES) < now):
+                            event.original_start_date_time - timedelta(
+                                minutes=constants.EARLY_CHECK_IN_MINUTES) < now):
                 #Event should be marked as started
                 event.actual_start_date_time = now
                 event.state = constants.STATE_IN_PROGRESS
