@@ -11,6 +11,7 @@ from api_messages import CheckInOutMessage, ID_RESOURCE, EventsResponseMessage, 
 import constants
 from ardux.models import ResourceDevice, ResourceCalendar, ResourceEvent, \
     CheckInOut, store_check_in
+from helpers import CalendarHelper
 
 
 @endpoints.api(name='gentlemeet', version='v1',
@@ -181,7 +182,8 @@ class GentleMeetApi(remote.Service):
         """
         Retrieves the current event that is taking place at this moment in the
         resource. If the resource doesn't exists throws an exception. If
-        there is no event happening right now throws an exception.
+        there is no event happening right now throws an exception. If
+        calendar access is not granted throws an exception.
         """
         logging.info('Getting the current event happening in resource ID: [%s]',
                      request.id)
@@ -204,9 +206,9 @@ class GentleMeetApi(remote.Service):
                       http_method='POST')
     def book_resource(self, request):
         """
-        Let a user book a resource in the moment, checks in the user. If the
-        resource doesn't exists throws an exception. If there is an event
-        happening throws an exception.
+        Let a user book a resource in the moment, create a calendar event and
+        checks the user in. If the resource doesn't exists throws an exception.
+        If there is an event happening throws an exception.
         """
         current_user = endpoints.get_current_user()
         if current_user is None:
@@ -227,7 +229,21 @@ class GentleMeetApi(remote.Service):
 
         now = datetime.datetime.now()
         end_time = now + datetime.timedelta(minutes=constants.QUICK_ADD_MINUTES)
-        #TODO: Create event in Google Calendar
+
+        #Create event in Google Calendar
+        client = Client.get_by_id(1)
+        if not client or not client.credentials or not client.refresh_token:
+            raise endpoints.BadRequestException(
+                'Domain calendar access is not yet configured')
+
+        calendar_helper = CalendarResourceHelper(
+            client.credentials, client.refresh_token, client.domain
+        )
+        calendar_event = calendar_helper.insert_or_update_event(
+            calendar_id=resource.email, summary=constants.QUICK_ADD_TITLE, description=constants.QUICK_ADD_DESCRIPTION,start_date=now, end_date=end_time,
+            location=resource.name, attendees=[current_user.email()]
+        )
+        #Save in datastore
         resource_event = ResourceEvent(
             organizer=current_user.email(),
             original_start_date_time=now,
@@ -237,7 +253,9 @@ class GentleMeetApi(remote.Service):
             title=constants.QUICK_ADD_TITLE,
             is_express=True,
             state=constants.STATE_IN_PROGRESS,
-            #event_id=
-        ).put()
+        )
+        resource_event.UpdateFromKey(ndb.Key(ResourceEvent, calendar_event[
+            'id']))
+        resource_event.put()
         store_check_in(resource_event, current_user.email())
         return event_db_to_rcp(resource_event)

@@ -68,5 +68,7 @@ EARLY_CHECK_IN_MINUTES = 5
 
 QUICK_ADD_MINUTES = 30
 
-QUICK_ADD_TITLE = 'Quick %s Meeting' % SOURCE_APP_NAME
+QUICK_ADD_TITLE = 'Quick Meeting'
+
+QUICK_ADD_DESCRIPTION = 'Quick meeting, created by %s' % SOURCE_APP_NAME
 

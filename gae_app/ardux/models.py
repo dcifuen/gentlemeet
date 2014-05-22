@@ -197,8 +197,6 @@ class ResourceEvent(EndpointsModel):
     is_express = ndb.BooleanProperty(indexed=False)
     state = ndb.StringProperty(choices=constants.EVENT_STATE_CHOICES,
                                indexed=False)
-    #Google Calendar event ID
-    event_id = ndb.StringProperty(indexed=False)
 
     def ResourceSet(self, value):
         if value:
