@@ -5,13 +5,15 @@ import uuid
 
 import endpoints
 from protorpc import remote
+from google.appengine.ext import ndb
 
 from api_messages import CheckInOutMessage, ID_RESOURCE, EventsResponseMessage, \
     EventMessage, event_db_to_rcp
 import constants
 from ardux.models import ResourceDevice, ResourceCalendar, ResourceEvent, \
     CheckInOut, store_check_in
-from helpers import CalendarHelper
+from helpers import CalendarResourceHelper
+from models import Client
 
 
 @endpoints.api(name='gentlemeet', version='v1',
@@ -96,7 +98,7 @@ class GentleMeetApi(remote.Service):
             if (event.original_start_date_time < now or
                             event.original_start_date_time - timedelta(
                                 minutes=constants.EARLY_CHECK_IN_MINUTES) < now):
-                #Event should be marked as started
+                # Event should be marked as started
                 event.actual_start_date_time = now
                 event.state = constants.STATE_IN_PROGRESS
             else:
@@ -230,7 +232,7 @@ class GentleMeetApi(remote.Service):
         now = datetime.datetime.now()
         end_time = now + datetime.timedelta(minutes=constants.QUICK_ADD_MINUTES)
 
-        #Create event in Google Calendar
+        # Create event in Google Calendar
         client = Client.get_by_id(1)
         if not client or not client.credentials or not client.refresh_token:
             raise endpoints.BadRequestException(
@@ -240,10 +242,12 @@ class GentleMeetApi(remote.Service):
             client.credentials, client.refresh_token, client.domain
         )
         calendar_event = calendar_helper.insert_or_update_event(
-            calendar_id=resource.email, summary=constants.QUICK_ADD_TITLE, description=constants.QUICK_ADD_DESCRIPTION,start_date=now, end_date=end_time,
+            calendar_id=resource.email, summary=constants.QUICK_ADD_TITLE,
+            description=constants.QUICK_ADD_DESCRIPTION, start_date=now,
+            end_date=end_time,
             location=resource.name, attendees=[current_user.email()]
         )
-        #Save in datastore
+        # Save in datastore
         resource_event = ResourceEvent(
             organizer=current_user.email(),
             original_start_date_time=now,
