@@ -25,6 +25,7 @@ OAUTH2_SCOPE = 'https://www.googleapis.com/auth/calendar ' \
                'https://apps-apis.google.com/a/feeds/calendar/resource/'
 
 OAUTH2_CLIENT_ID = '233923764866.apps.googleusercontent.com'
+OAUTH2_ANDROID_CLIENT_ID = '233923764866-k32j3s7n70s0rsctomljemrhbq4s2660.apps.googleusercontent.com'
 
 #Model constants
 TYPE_PHYSICAL = 'PHYSICAL'

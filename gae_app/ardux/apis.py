@@ -22,7 +22,9 @@ from models import Client
                description='Backend API for managing rooms and meetings with '
                            'GentleMeet',
                allowed_client_ids=[constants.OAUTH2_CLIENT_ID,
-                                   endpoints.API_EXPLORER_CLIENT_ID])
+                                   constants.OAUTH2_ANDROID_CLIENT_ID,
+                                   endpoints.API_EXPLORER_CLIENT_ID],
+               audiences=[constants.OAUTH2_CLIENT_ID])
 class GentleMeetApi(remote.Service):
     @ResourceDevice.method(path='device',
                            http_method='POST',
