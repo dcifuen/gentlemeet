@@ -1,6 +1,6 @@
 function api_init(){
     console.log("Initializing Endpoints Service");
-    window.api = 'devices'
+    window.api = 'gentlemeet'
     window.version = 'v1'
     if(window.api_load){
         window.load_api = false;

@@ -85,7 +85,7 @@ def sign_in():
                            APPLICATION_NAME=constants.SOURCE_APP_NAME)
 
 
-@app.route('/connect', methods=['POST'])
+@app.route('/signin/connect', methods=['POST'])
 def connect():
     """Exchange the one-time authorization code for a token and
     store the token in the session."""

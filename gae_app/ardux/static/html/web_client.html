@@ -8,7 +8,7 @@
 
         <!-- js libraries -->
         <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/moment-with-langs.min.js">
+        <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/moment-with-langs.min.js"></script>
         <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
         <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.10.0/ui-bootstrap.js"></script>
@@ -89,16 +89,16 @@
                     <div class="row">
                         <div class="col-md-12">
                             <h2>
-                                {{ actual_event.title }}
+                                {{actual_event.title}}
                             </h2>
                             <h2>
-                                <strong>{{ actual_event.start_date_time|date:'hh:mm a'}}</strong>
+                                <strong>{{actual_event.start_date_time|date:'hh:mm a'}}</strong>
                                 -
-                                <strong>{{ actual_event.end_date_time|date:'hh:mm a'}}</strong>
+                                <strong>{{actual_event.end_date_time|date:'hh:mm a'}}</strong>
                             </h2>
 
                             <h4>
-                                {{ actual_event.description }}
+                                {{actual_event.description}}
                             </h4>
                         </div>
                     </div>
@@ -108,15 +108,15 @@
                             <h3>Asistentes</h3>
                             <ul>
                                 <li ng-repeat="attendee in actual_event.attendees">
-                                    {{ attendee.name }}
+                                    {{attendee.name}}
                                 </li>
                             </ul>
                         </div>
 
                         <div class="col-md-4">
-                            <a href="{{ getCheckinURL(false) }}">
+                            <a href="{{getCheckinURL(false)}}">
                                 <img  class="center-block" src="
-                                {{ getCheckinURL(true) }}">
+                                {{getCheckinURL(true)}}">
                             </a>
                         </div>
                     </div>
@@ -127,9 +127,9 @@
                 background-color: #ff6e47;">
                     <h4>Proximos Eventos</h4>
                     <div class="col-md-2" ng-repeat="event in eventsList">
-                        <strong>{{ event.start_date_time|date:'hh:mm a'}}</strong>
+                        <strong>{{event.start_date_time|date:'hh:mm a'}}</strong>
                         -
-                        <strong>{{ event.end_date_time|date:'hh:mm a'}}</strong>
+                        <strong>{{event.end_date_time|date:'hh:mm a'}}</strong>
                         <br/>
                         {{event.title}}
                     </div>
