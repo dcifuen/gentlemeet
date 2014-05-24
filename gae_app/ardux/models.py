@@ -111,7 +111,7 @@ class ResourceDevice(EndpointsModel):
         'resource_id', 'resource')
 
     name = ndb.StringProperty()
-    uuid = ndb.StringProperty(required=True)
+    uuid = ndb.StringProperty(required=True, indexed=False)
     type = ndb.StringProperty(choices=constants.DEVICE_CHOICES,
                               required=True, indexed=False)
     # TODO: Refactor states to use Fysom

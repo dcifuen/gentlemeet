@@ -145,12 +145,43 @@ class GentleMeetApi(remote.Service):
             raise endpoints.BadRequestException(
                 'The user did not checked in or checked in the future')
 
-        # TODO: Check if the event should be marked as finished
-
         CheckInOut(parent=event.key, attendee=current_user.email(),
                    type=constants.CHECK_OUT).put()
 
         return CheckInOutMessage(userEmail=current_user.email())
+
+    @endpoints.method(ID_RESOURCE, EventMessage,
+                      path='event/{id}/finish',
+                      name='event.finish',
+                      http_method='POST')
+    def finish_event(self, request):
+        """
+        Mark an event as finished and set the actual end time as right now. If
+        there is not a logged in user throws an exception. If the user is not an
+        attendee of the event throws an exception.
+        """
+        current_user = endpoints.get_current_user()
+        if current_user is None:
+            raise endpoints.UnauthorizedException(
+                'Invalid token. Please authenticate first')
+
+        logging.info('User [%s] marks event ID [%s] as finished',
+                     current_user, request.id)
+
+        event = ResourceEvent.get_by_id(request.id)
+        if not event:
+            raise endpoints.BadRequestException(
+                'Unable to find event with id %s' % request.id)
+
+        if current_user.email() not in event.attendees:
+            raise endpoints.BadRequestException(
+                'User %s is not an attendee of the event' % (
+                    current_user.email(), request.id))
+
+        event.state = constants.STATE_FINISHED
+        event.actual_end_date_time = datetime.now()
+        event.put()
+        return event_db_to_rcp(event)
 
 
     @endpoints.method(ID_RESOURCE, EventsResponseMessage,

@@ -20,7 +20,7 @@ class OAuthDanceHelper:
 
     def __init__(self, redirect_uri='', approval_prompt='auto',
                  scope=None):
-        scope = app.config.get('OAUTH2_SCOPE')
+        scope = constants.OAUTH2_SCOPE
         self.flow = OAuth2WebServerFlow(
             client_id=constants.OAUTH2_CLIENT_ID,
             client_secret=app.config.get(
@@ -157,14 +157,10 @@ class CalendarHelper(OAuthServiceHelper):
                 tem_events = self.service.events().list(
                     calendarId=calendar_id,
                     pageToken=page_token,
-                    singleEvents=True,
-                    orderBy='startTime',
                     **kwargs).execute()
             else:
                 tem_events = self.service.events().list(
                     calendarId=calendar_id,
-                    singleEvents=True,
-                    orderBy='startTime',
                     **kwargs).execute()
             events.extend(tem_events['items'])
             page_token = tem_events.get('nextPageToken')
