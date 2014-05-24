@@ -62,54 +62,77 @@
 
             <div class="row">
                 <div class="col-md-4">
-                    <h3 style="text-align: center" >Eventos</h3>
-                    <accordion>
-                        <accordion-group heading="{{event.title}} {{ event.start_date_time|date:'yyyy-MM-dd HH:mm:ss'}}"
-                                         ng-repeat="event in eventsList">
-                            {{ event.summary }}
-                        </accordion-group>
-                    </accordion>
-
-                    <button type="button" class="btn btn-primary disabled
-                    center-block" style="margin-top: 5px;">
-                        Apartar sala
-                    </button>
-
+                    <div class="row">
+                       <div class="col-md-12" style="background-color:
+                       #ff6e47; height: 70px">
+                           Logo
+                       </div>
+                    </div>
+                    <div class="row">
+                       <div class="col-md-12">
+                           <h1 style="text-align: center">
+                                {{getSecondsAsDate(actual_event.duration) | date:'H:mm:ss'}}
+                           </h1>
+                       </div>
+                    </div>
+                    <div class="row">
+                       <div class="col-md-12">
+                            <button type="button" class="btn btn-primary disabled
+                            center-block" style="margin-top: 5px;">
+                                Apartar sala
+                            </button>
+                       </div>
+                    </div>
                 </div>
 
-                <div class="col-md-4">
-                    <h1 style="text-align: center">
-                        {{ actual_event.title }}
-                    </h1>
-                    <h1 style="text-align: center">
-                        {{getSecondsAsDate(actual_event.duration) | date:'H:mm:ss'}}
-                    </h1>
-                    <h4 style="text-align: center">
-                        {{ actual_event.description }}
-                    </h4>
-                </div>
+                <div class="col-md-8">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h2>
+                                {{ actual_event.title }}
+                            </h2>
+                            <h2>
+                                <strong>{{ actual_event.start_date_time|date:'hh:mm a'}}</strong>
+                                -
+                                <strong>{{ actual_event.end_date_time|date:'hh:mm a'}}</strong>
+                            </h2>
 
-                <div class="col-md-4">
-                    <h3 style="text-align: center">Asistentes</h3>
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Asistió</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr ng-repeat="attendee in actual_event.attendees">
-                                <td>{{ attendee.name }}</td>
-                                <td> <input type="checkbox"
-                                            ng-model="attendee.attended"></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <a href="{{ getCheckinURL(false) }}">
-                        <img  class="center-block" src="
-                        {{ getCheckinURL(true) }}">
-                    </a>
+                            <h4>
+                                {{ actual_event.description }}
+                            </h4>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <hr style="width: 90%; margin-left: 16px;"/>
+                        <div class="col-md-8">
+                            <h3>Asistentes</h3>
+                            <ul>
+                                <li ng-repeat="attendee in actual_event.attendees">
+                                    {{ attendee.name }}
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="col-md-4">
+                            <a href="{{ getCheckinURL(false) }}">
+                                <img  class="center-block" src="
+                                {{ getCheckinURL(true) }}">
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row" >
+                <div class="col-md-12" style="position: fixed; bottom: 30px;
+                background-color: #ff6e47;">
+                    <h4>Proximos Eventos</h4>
+                    <div class="col-md-2" ng-repeat="event in eventsList">
+                        <strong>{{ event.start_date_time|date:'hh:mm a'}}</strong>
+                        -
+                        <strong>{{ event.end_date_time|date:'hh:mm a'}}</strong>
+                        <br/>
+                        {{event.title}}
+                    </div>
                 </div>
             </div>
 
