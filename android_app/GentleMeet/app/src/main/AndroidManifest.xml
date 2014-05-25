@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="co.falconlabs.gentlemeet.app" >
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/clean_logo"
+        android:label="@string/app_name"
+        android:theme="@style/Theme.Gentlemeet" >
+        <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
+
+        <activity
+            android:name="co.falconlabs.gentlemeet.app.MainActivity"
+            android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name="co.falconlabs.gentlemeet.app.SplashScreenActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/app_name"
+            android:theme="@style/FullscreenTheme" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="co.falconlabs.gentlemeet.app.SigninActivity"
+            android:label="@string/title_activity_signin" >
+        </activity>
+
+        <activity android:name="SettingsActivity"></activity>
+    </application>
+
+</manifest>
