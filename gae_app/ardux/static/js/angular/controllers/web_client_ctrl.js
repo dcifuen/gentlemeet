@@ -4,7 +4,7 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
     };
 
     $scope.countdownTimer = null;
-    $scope.calendarId = 5629499534213120; //Should be device Id
+    $scope.calendarId = '-60841444955'; //Should be device Id
 
     $scope.$on(endpointsService.ENDPOINTS_READY, function () {
         //load tags
