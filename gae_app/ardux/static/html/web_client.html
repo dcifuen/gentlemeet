@@ -119,7 +119,7 @@
                     <div class="row">
                         <div class="col-md-12">
                             <h2>
-                                {{actual_event.title}}
+                                {{actual_event.summary}}
                             </h2>
                             <h2>
                                 <strong>{{actual_event.startTimeAux|date:'hh:mm a'}}</strong>
@@ -138,7 +138,7 @@
                         <div class="col-md-8">
                             <h3>Asistentes</h3>
                             <ul class="list-unstyled icon-list">
-                                <li ng-repeat="attendee in actual_event.no_response_attendees">
+                                <li ng-repeat="attendee in actual_event.total_attendees">
                                     <span class="glyphicon"
                                           ng-class="
                                           {'glyphicon-ok' :
@@ -166,12 +166,13 @@
             <div class="row navbar-fixed-bottom" >
                 <div class="col-md-12 orange3">
                     <h4>Proximos Eventos</h4>
-                    <div class="col-md-2" ng-repeat="event in eventsList">
-                        <strong>{{event.start_date_time|date:'hh:mm a'}}</strong>
+                    <div class="col-md-2" ng-repeat="event in eventsList
+                    .slice(0,13)">
+                        <strong>{{event.startTime|date:'hh:mm a'}}</strong>
                         -
-                        <strong>{{event.end_date_time|date:'hh:mm a'}}</strong>
+                        <strong>{{event.endTime|date:'hh:mm a'}}</strong>
                         <br/>
-                        {{event.title}}
+                        {{event.summary}}
                     </div>
                 </div>
             </div>

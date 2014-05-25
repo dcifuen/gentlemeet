@@ -14,6 +14,12 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
         endpointsService.eventsTodayResource ({'id':$scope.calendarId},
             function (response) {
                 console.log('get list Events ',response);
+
+                response.items.forEach(function(item) {
+                    item.startTime = new Date(item.start_date_time);
+                    item.endTime = new Date(item.end_date_time);
+                });
+
                 $scope.eventsList = response.items;
             }
         );
@@ -35,6 +41,23 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
                 response.checkinURL = '';
                 response.startTimeAux = startTime;
                 response.endTimeAux = endTime;
+                response.total_attendees = [];
+                if(!response.actual_attendees){
+                    response.actual_attendees = [];
+                }
+
+                if(response.no_response_attendees){
+                    response.total_attendees = response.total_attendees.concat(response.no_response_attendees);
+                }
+                if(response.yes_attendees){
+                    response.total_attendees = response.total_attendees.concat(response.yes_attendees);
+                }
+                if(response.maybe_attendees){
+                    response.total_attendees = response.total_attendees.concat()
+                }
+
+
+
                 $scope.actual_event = response;
                 $scope.countdownTimer  = $timeout($scope.onTimeout, 1000);
             }
