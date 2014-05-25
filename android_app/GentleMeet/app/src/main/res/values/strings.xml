@@ -2,9 +2,7 @@
 <resources>
 
     <string name="app_name">GentleMeet</string>
-    <string name="title_section1">Section 1</string>
-    <string name="title_section2">Section 2</string>
-    <string name="title_section3">Section 3</string>
+    <string name="title_section1">Rooms</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="action_example">Example action</string>
@@ -19,5 +17,6 @@
     <string name="toast_exception_checking_authorization">There was a problem in the authentication</string>
     <string name="pref_email">Account Email</string>
     <string name="toast_no_google_accounts_registered">No Google Accounts Registered</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

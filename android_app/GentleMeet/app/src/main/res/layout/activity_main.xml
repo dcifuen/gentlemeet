@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:icon="@drawable/clean_logo"
+
     tools:context="co.falconlabs.gentlemeet.app.MainActivity">
 
     <!-- As the main content view, the view below consumes the entire

@@ -4,6 +4,7 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -16,13 +17,19 @@ import android.widget.Toast;
 
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
-import com.google.android.gms.common.AccountPicker;
+import com.google.android.gms.common.*;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.plus.Plus;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+
 
 import java.io.IOException;
 
 
-public class SigninActivity extends Activity{
+public class SigninActivity extends Activity implements
+        ConnectionCallbacks, OnConnectionFailedListener, View.OnClickListener{
 
     private static final String LOG_TAG = SigninActivity.class.getName();
 
@@ -30,11 +37,24 @@ public class SigninActivity extends Activity{
     private static final int RC_SIGN_IN = 0;
 
     /* Client used to interact with Google APIs. */
+    private GoogleApiClient mGoogleApiClient;
+
+    /* Client used to interact with Google APIs. */
 
     /* A flag indicating that a PendingIntent is in progress and prevents
      * us from starting further intents.
      */
     private boolean mIntentInProgress;
+
+    /* Track whether the sign-in button has been clicked so that we know to resolve
+     * all issues preventing sign-in without waiting.
+     */
+    private boolean mSignInClicked;
+
+    /* Store the connection result from onConnectionFailed callbacks so that we can
+     * resolve them when the user clicks sign-in.
+     */
+    private ConnectionResult mConnectionResult;
 
     private static final int ACTIVITY_RESULT_FROM_ACCOUNT_SELECTION = 2222;
 
@@ -51,14 +71,54 @@ public class SigninActivity extends Activity{
         getActionBar().setTitle(R.string.signin);
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         mEmailAccount = prefs.getString("pref_email", "");
+        findViewById(R.id.sign_in_button).setOnClickListener(this);
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(Plus.API, null)
+                .addScope(Plus.SCOPE_PLUS_LOGIN)
+                .build();
     }
 
     protected void onStart() {
         super.onStart();
+        mGoogleApiClient.connect();
     }
 
     protected void onStop() {
         super.onStop();
+
+        if (mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
+        }
+    }
+
+    public void onConnectionFailed(ConnectionResult result) {
+        if (!mIntentInProgress) {
+            // Store the ConnectionResult so that we can use it later when the user clicks
+            // 'sign-in'.
+            mConnectionResult = result;
+
+            if (mSignInClicked) {
+                // The user has already clicked 'sign-in' so we attempt to resolve all
+                // errors until the user is signed in, or they cancel.
+                resolveSignInErrors();
+            }
+        }
+    }
+
+    public void onConnected(Bundle connectionHint) {
+        // We've resolved any connection errors.  mGoogleApiClient can be used to
+        // access Google APIs on behalf of the user.
+        String email = Plus.AccountApi.getAccountName(mGoogleApiClient);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString("pref_email", email);
+        editor.commit();
+        performAuthCheck(email);
+    }
+
+    public void onConnectionSuspended(int cause) {
+        mGoogleApiClient.connect();
     }
 
     @Override
@@ -70,50 +130,42 @@ public class SigninActivity extends Activity{
         }
     }
 
-    public void onClickSignIn(View view) {
-        // Check to see how many Google accounts are registered with the device.
-        // No accounts registered, nothing to do.
-        int googleAccounts = AppConstants.countGoogleAccounts(this);
-        if (googleAccounts == 0) {
-            // No accounts registered, nothing to do.
-            Toast.makeText(this, R.string.toast_no_google_accounts_registered,
-                    Toast.LENGTH_LONG).show();
-        } else if (googleAccounts == 1) {
-            AccountManager am = AccountManager.get(this);
-            Account[] accounts = am.getAccountsByType(GoogleAuthUtil.GOOGLE_ACCOUNT_TYPE);
-            if (accounts != null && accounts.length > 0) {
-                mEmailAccount = accounts[0].name;
-                SharedPreferences.Editor editor = prefs.edit();
-                editor.putString("pref_email", mEmailAccount);
-                editor.commit();
-                performAuthCheck(accounts[0].name);
+    /* A helper method to resolve the current ConnectionResult error. */
+    private void resolveSignInErrors() {
+        if (mConnectionResult.hasResolution()) {
+            try {
+                mIntentInProgress = true;
+                startIntentSenderForResult(mConnectionResult.getResolution().getIntentSender(),
+                        RC_SIGN_IN, null, 0, 0, 0);
+            } catch (IntentSender.SendIntentException e) {
+                // The intent was canceled before it was sent.  Return to the default
+                // state and attempt to connect to get an updated ConnectionResult.
+                mIntentInProgress = false;
+                mGoogleApiClient.connect();
             }
-        } else {
-            // More than one Google Account is present, a chooser is necessary.
-            // Invoke an {@code Intent} to allow the user to select a Google account.
-            Intent accountSelector = AccountPicker.newChooseAccountIntent(null, null,
-                    new String[]{GoogleAuthUtil.GOOGLE_ACCOUNT_TYPE}, false,
-                    "Select the account to access GentleMeet.", null, null, null);
-            startActivityForResult(accountSelector,
-                    ACTIVITY_RESULT_FROM_ACCOUNT_SELECTION);
         }
-
     }
+
+    public void onClick(View view) {
+        if (view.getId() == R.id.sign_in_button
+                && !mGoogleApiClient.isConnecting()) {
+            mSignInClicked = true;
+            resolveSignInErrors();
+        }
+    }
+
 
     protected void onActivityResult(int requestCode, int responseCode, Intent intent) {
         super.onActivityResult(requestCode, responseCode, intent);
 
-        if (requestCode == ACTIVITY_RESULT_FROM_ACCOUNT_SELECTION && responseCode == RESULT_OK) {
-            // This path indicates the account selection activity resulted in the user selecting a
-            // Google account and clicking OK.
-
-            // Set the selected account.
-            String accountName = intent.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
-            mEmailAccount = accountName;
-            SharedPreferences.Editor editor = prefs.edit();
-            editor.putString("pref_email", mEmailAccount);
-            editor.commit();
-            performAuthCheck(accountName);
+        if (requestCode == RC_SIGN_IN) {
+            if (responseCode != RESULT_OK) {
+                mSignInClicked = false;
+            }
+            mIntentInProgress = false;
+            if (!mGoogleApiClient.isConnecting()) {
+                mGoogleApiClient.connect();
+            }
         }
     }
 

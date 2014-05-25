@@ -1,0 +1,30 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="50dp"
+    android:padding="5dip" >
+
+    <TextView
+        android:id="@+id/room_row_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:gravity="center|left"
+        android:text="Sala 303"
+        android:textColor="#000"
+        android:typeface="sans"
+        android:textSize="20dip"
+        android:textStyle="bold"
+        android:layout_margin="2dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="false"
+        android:layout_alignParentTop="true" />
+
+    <ImageView android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_action_navigation_next_item"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:baselineAlignBottom="true" />
+
+</RelativeLayout>
