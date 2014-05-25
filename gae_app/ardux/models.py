@@ -194,6 +194,7 @@ class ResourceEvent(EndpointsModel):
     resource_key = ndb.KeyProperty(ResourceCalendar)
     title = ndb.StringProperty(indexed=False)
     summary = ndb.StringProperty(indexed=False)
+    description = ndb.StringProperty(indexed=False)
     is_express = ndb.BooleanProperty(indexed=False)
     state = ndb.StringProperty(choices=constants.EVENT_STATE_CHOICES,
                                indexed=False)

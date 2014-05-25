@@ -107,10 +107,10 @@ class GentleMeetApi(remote.Service):
                 raise endpoints.BadRequestException(
                     'The event has not started')
 
-            # Here goes the actual check in logic
-            store_check_in(event, current_user.email())
+        # Here goes the actual check in logic
+        store_check_in(event, current_user.email())
 
-            return CheckInOutMessage(userEmail=current_user.email())
+        return CheckInOutMessage(userEmail=current_user.email())
 
 
     @endpoints.method(ID_RESOURCE, CheckInOutMessage,
@@ -217,7 +217,6 @@ class GentleMeetApi(remote.Service):
         """
         Retrieves the current event that is taking place at this moment in the
         resource. If the resource doesn't exists throws an exception. If
-        there is no event happening right now throws an exception. If
         calendar access is not granted throws an exception.
         """
         logging.info('Getting the current event happening in resource ID: [%s]',

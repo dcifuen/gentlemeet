@@ -86,24 +86,36 @@ def sync_resource_events(resource_id, resource_email):
                         parse(event['start']['dateTime'])).replace(tzinfo=None)
                     event_db.original_end_date_time = pytz.utc.normalize(
                         parse(event['end']['dateTime'])).replace(tzinfo=None)
-                    for attendee in event['attendees']:
+
+
+                    no_response_attendees = []
+                    maybe_attendees = []
+                    yes_attendees= []
+                    no_attendees=[]
+
+                    for attendee in event.get('attendees',[]):
                         if not attendee.get('resource', False):
                             attendee_email = attendee['email']
                             logging.info('Adding attendee %s response %s',
                                          attendee_email, attendee['responseStatus'])
                             if attendee['responseStatus'] == "accepted":
-                                event_db.yes_attendees.append(attendee_email)
+                                yes_attendees.append(attendee_email)
                             elif attendee['responseStatus'] == "tentative":
-                                event_db.maybe_attendees.append(attendee_email)
+                                maybe_attendees.append(attendee_email)
                             elif attendee['responseStatus'] == "declined":
-                                event_db.no_attendees.append(attendee_email)
+                                no_attendees.append(attendee_email)
                             elif attendee['responseStatus'] == "needsAction":
-                                event_db.no_response_attendees.append(
+                                no_response_attendees.append(
                                     attendee_email)
+                    event_db.yes_attendees = yes_attendees
+                    event_db.maybe_attendees = maybe_attendees
+                    event_db.no_attendees = no_attendees
+                    event_db.no_response_attendees = no_response_attendees
 
                     event_db.resource_key = ndb.Key(ResourceCalendar,
                                                     resource_id)
                     event_db.summary = event['summary']
+                    event_db.description = event.get('description','')
                     event_db.put()
 
             else:

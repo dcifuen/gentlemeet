@@ -4,7 +4,7 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
     };
 
     $scope.countdownTimer = null;
-    $scope.calendarId = 5629499534213120; //Should be device Id
+    $scope.calendarId = '-60841444955'; //Should be device Id
 
     $scope.$on(endpointsService.ENDPOINTS_READY, function () {
         //load tags
@@ -14,6 +14,12 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
         endpointsService.eventsTodayResource ({'id':$scope.calendarId},
             function (response) {
                 console.log('get list Events ',response);
+
+                response.items.forEach(function(item) {
+                    item.startTime = new Date(item.start_date_time);
+                    item.endTime = new Date(item.end_date_time);
+                });
+
                 $scope.eventsList = response.items;
             }
         );
@@ -26,8 +32,32 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
                 console.log('get Actual Event end',response.end_date_time);
                 var startTime = new Date(response.start_date_time);
                 var endTime = new Date(response.end_date_time);
-                response.duration = (endTime - startTime) / (60 * 1000)
+                var now = new Date();
+                console.log('now',now);
+                console.log('endTime',endTime);
+                console.log('endTime - now',endTime - now);
+
+                response.duration = (endTime - now) / 1000
                 response.checkinURL = '';
+                response.startTimeAux = startTime;
+                response.endTimeAux = endTime;
+                response.total_attendees = [];
+                if(!response.actual_attendees){
+                    response.actual_attendees = [];
+                }
+
+                if(response.no_response_attendees){
+                    response.total_attendees = response.total_attendees.concat(response.no_response_attendees);
+                }
+                if(response.yes_attendees){
+                    response.total_attendees = response.total_attendees.concat(response.yes_attendees);
+                }
+                if(response.maybe_attendees){
+                    response.total_attendees = response.total_attendees.concat()
+                }
+
+
+
                 $scope.actual_event = response;
                 $scope.countdownTimer  = $timeout($scope.onTimeout, 1000);
             }

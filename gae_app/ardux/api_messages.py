@@ -9,7 +9,7 @@ import constants
 def event_db_to_rcp(resource_event):
     """ Converts datastore ResourceEvent entity to RPC EventMessage object """
     return EventMessage(
-        id=resource_event.id,
+        id=resource_event.key.string_id(),
         title=resource_event.title,
         summary=resource_event.summary,
         organizer=resource_event.organizer,
@@ -21,7 +21,8 @@ def event_db_to_rcp(resource_event):
         no_attendees=resource_event.no_attendees,
         maybe_attendees=resource_event.maybe_attendees,
         no_response_attendees=resource_event.no_response_attendees,
-        state=EnumHelpers.EventStateFromString(resource_event.state)
+        state=EnumHelpers.EventStateFromString(resource_event.state),
+        description=resource_event.description
     )
 
 
@@ -48,7 +49,7 @@ class EventMessage(messages.Message):
         CANCELLED = 4
         UNDEFINED = 255
 
-    id = messages.IntegerField(1, variant=messages.Variant.INT32, required=True)
+    id = messages.StringField(1, required=True)
     title = messages.StringField(2)
     summary = messages.StringField(3)
     organizer = messages.StringField(4)
@@ -62,6 +63,7 @@ class EventMessage(messages.Message):
     no_response_attendees = messages.StringField(12, repeated=True)
     state = messages.EnumField(EventStateEnum, 13,
                                default=EventStateEnum.SCHEDULED)
+    description = messages.StringField(14)
 
 
 class EventsResponseMessage(messages.Message):
@@ -70,4 +72,4 @@ class EventsResponseMessage(messages.Message):
 
 ID_RESOURCE = endpoints.ResourceContainer(
     VoidMessage,
-    id=messages.IntegerField(1, variant=messages.Variant.INT32, required=True))
+    id=messages.StringField(1,  required=True))
