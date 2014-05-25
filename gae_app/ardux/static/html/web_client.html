@@ -56,31 +56,61 @@
         <!-- Google endpoint js library -->
         <script src="https://apis.google.com/js/client.js?onload=api_init"></script>
 
+
+
+        <style>
+            .orange1 {
+                background-color: #FDCEBF;
+            }
+            .orange2 {
+                background-color: #ff8c65;
+              }
+
+            .orange3 {
+                background-color: #ff6e47;
+            }
+
+            .orange4 {
+                background-color: #ff4e2d;
+            }
+
+            @media (min-width: 768px) {
+                #content{
+                    min-height:100%;
+                    height:auto !important;
+                    height:100%;
+                    /* Negative indent header and footer by its height */
+                    margin:-69px auto -147px;
+                    /* Pad bottom by header and footer height */
+                    padding:80px 0 60px;
+                }
+            }
+
+
+
+        </style>
+
     </head>
     <body ng-app="gApp">
         <div ng-controller="testCtrl">
-
             <div class="row">
                 <div class="col-md-4">
-                    <div class="row">
-                       <div class="col-md-12" style="background-color:
-                       #ff6e47; height: 70px">
-                           Logo
+                    <div id="header" class="row orange2" style="padding-left: 149px;">
+                       <div class="col-md-12">
+                           <img src="/static/img/GentleMeet-logo.png">
                        </div>
                     </div>
                     <div class="row">
-                       <div class="col-md-12">
+                       <div id="content" class="col-md-12">
                            <h1 style="text-align: center">
                                 {{getSecondsAsDate(actual_event.duration) | date:'H:mm:ss'}}
                            </h1>
                        </div>
                     </div>
-                    <div class="row">
-                       <div class="col-md-12">
-                            <button type="button" class="btn btn-primary disabled
-                            center-block" style="margin-top: 5px;">
+                    <div id="footer" class="row orange2">
+                       <div class="col-md-12" style="height: 70px;
+                       text-align: center; cursor:pointer; padding: 27px;">
                                 Apartar sala
-                            </button>
                        </div>
                     </div>
                 </div>
@@ -122,9 +152,8 @@
                     </div>
                 </div>
             </div>
-            <div class="row" >
-                <div class="col-md-12" style="position: fixed; bottom: 30px;
-                background-color: #ff6e47;">
+            <div class="row navbar-fixed-bottom" >
+                <div class="col-md-12 orange3">
                     <h4>Proximos Eventos</h4>
                     <div class="col-md-2" ng-repeat="event in eventsList">
                         <strong>{{event.start_date_time|date:'hh:mm a'}}</strong>
