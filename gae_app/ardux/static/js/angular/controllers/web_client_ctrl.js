@@ -26,8 +26,15 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
                 console.log('get Actual Event end',response.end_date_time);
                 var startTime = new Date(response.start_date_time);
                 var endTime = new Date(response.end_date_time);
-                response.duration = (endTime - startTime) / (60 * 1000)
+                var now = new Date();
+                console.log('now',now);
+                console.log('endTime',endTime);
+                console.log('endTime - now',endTime - now);
+
+                response.duration = (endTime - now) / 1000
                 response.checkinURL = '';
+                response.startTimeAux = startTime;
+                response.endTimeAux = endTime;
                 $scope.actual_event = response;
                 $scope.countdownTimer  = $timeout($scope.onTimeout, 1000);
             }

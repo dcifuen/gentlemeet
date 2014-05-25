@@ -122,9 +122,10 @@
                                 {{actual_event.title}}
                             </h2>
                             <h2>
-                                <strong>{{actual_event.start_date_time|date:'hh:mm a'}}</strong>
+                                <strong>{{actual_event.startTimeAux|date:'hh:mm a'}}</strong>
                                 -
-                                <strong>{{actual_event.end_date_time|date:'hh:mm a'}}</strong>
+                                <strong>{{actual_event.endTimeAux|date:'hh:mm a'}}</strong>
+
                             </h2>
 
                             <h4>
@@ -136,9 +137,19 @@
                         <hr style="width: 90%; margin-left: 16px;"/>
                         <div class="col-md-8">
                             <h3>Asistentes</h3>
-                            <ul>
-                                <li ng-repeat="attendee in actual_event.attendees">
-                                    {{attendee.name}}
+                            <ul class="list-unstyled icon-list">
+                                <li ng-repeat="attendee in actual_event.no_response_attendees">
+                                    <span class="glyphicon"
+                                          ng-class="
+                                          {'glyphicon-ok' :
+                                          actual_event.actual_attendees
+                                          .indexOf(attendee)  > -1,
+                                          'glyphicon-remove' :
+                                          actual_event.actual_attendees
+                                          .indexOf(attendee)  == -1
+                                          }">
+                                        {{attendee}}
+                                    </span>
                                 </li>
                             </ul>
                         </div>
