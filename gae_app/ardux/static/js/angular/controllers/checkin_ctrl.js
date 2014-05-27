@@ -1,6 +1,6 @@
 gApp.controller('checkinCtrl', ['$scope', '$timeout','EndpointsService', function ($scope, $timeout, endpointsService) {
 
-    $scope.CLIENT_ID = "";
+    $scope.CLIENT_ID = "233923764866.apps.googleusercontent.com";
     $scope.SCOPES = "https://www.googleapis.com/auth/userinfo.email"
     $scope.event_id = getURLParameter('event_id');
     $scope.url_callback = getURLParameter('callback');
