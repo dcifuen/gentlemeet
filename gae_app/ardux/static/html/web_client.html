@@ -107,15 +107,32 @@
                            </h1>
                        </div>
                     </div>
-                    <div id="footer" class="row orange2">
+                    <div id="footer" class="row orange2"  ng-show="!actual_event">
+                       <a href="#" ng-click="">
+                           <div class="col-md-12" style="height: 70px;
+                           text-align: center; padding: 27px;">
+                                    Apartar sala
+                           </div>
+                       </a>
+                    </div>
+                    <div id="footer" class="row orange2"  ng-show="actual_event">
                        <div class="col-md-12" style="height: 70px;
-                       text-align: center; cursor:pointer; padding: 27px;">
+                       text-align: center; padding: 27px;">
                                 Apartar sala
                        </div>
                     </div>
                 </div>
 
-                <div class="col-md-8">
+                <div class="col-md-8" ng-show="!actual_event">
+                   <br>
+                    <br>
+                    <br>
+                   <h2>
+                       En Estos momentos no hay evento
+                   </h2>
+                </div>
+
+                <div class="col-md-8" ng-show="actual_event">
                     <div class="row">
                         <div class="col-md-12">
                             <h2>
@@ -164,7 +181,7 @@
                 </div>
             </div>
             <div class="row navbar-fixed-bottom" >
-                <div class="col-md-12 orange3">
+                <div class="col-md-12 orange3" style="min-height: 79px;">
                     <h4>Proximos Eventos</h4>
                     <div class="col-md-2" ng-repeat="event in eventsList
                     .slice(0,13)">
