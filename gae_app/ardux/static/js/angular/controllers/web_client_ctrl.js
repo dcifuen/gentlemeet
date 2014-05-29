@@ -6,11 +6,8 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
     $scope.countdownTimer = null;
     $scope.calendarId = '-60841444955'; //Should be device Id
 
-    $scope.$on(endpointsService.ENDPOINTS_READY, function () {
-        //load tags
-        console.log("Endpoints ready...");
 
-
+    $scope.events_today_resource = function(){
         endpointsService.eventsTodayResource ({'id':$scope.calendarId},
             function (response) {
                 console.log("error",response);
@@ -30,19 +27,18 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
                 }
             }
         );
+    }
 
-
+    $scope.event_current_resource = function(){
         endpointsService.eventCurrentResource({'id':$scope.calendarId},
             function(response){
+                console.log(response);
                 if(response.error){
                     $scope.actual_event = null;
                 }else{
                     var startTime = new Date(response.start_date_time);
                     var endTime = new Date(response.end_date_time);
                     var now = new Date();
-                    console.log('now',now);
-                    console.log('endTime',endTime);
-                    console.log('endTime - now',endTime - now);
 
                     response.duration = (endTime - now) / 1000
                     response.checkinURL = '';
@@ -63,14 +59,29 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
                         response.total_attendees = response.total_attendees.concat()
                     }
 
+                    if(!$scope.actual_event ||
+                        ($scope.actual_event && response.id && response.id != $scope.actual_event.id)
+                      ){
+                        $scope.actual_event = response;
+                        $scope.countdownTimer  = $timeout($scope.onTimeout, 1000);
+                    }
 
-
-                    $scope.actual_event = response;
-                    $scope.countdownTimer  = $timeout($scope.onTimeout, 1000);
                 }
             }
         );
+    }
+
+
+    $scope.$on(endpointsService.ENDPOINTS_READY, function () {
+        //load tags
+        console.log("Endpoints ready...");
+        $scope.events_today_resource();
+        $scope.event_current_resource();
+
+        setInterval($scope.events_today_resource,2000);
+        setInterval($scope.event_current_resource,2000);
     });
+
 
     $scope.onTimeout = function(){
         if($scope.actual_event.duration >0){
