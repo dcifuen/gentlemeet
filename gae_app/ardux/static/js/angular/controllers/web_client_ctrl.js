@@ -87,6 +87,11 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
         if($scope.actual_event.duration >0){
             $scope.actual_event.duration--;
             $scope.countdownTimer = $timeout($scope.onTimeout, 1000);
+        }else{
+            endpointsService.finishEvent({'id':$scope.actual_event.id}, function(response){
+                console.log('Event was finished')
+            });
+            $scope.actual_event = null;
         }
     }
 
