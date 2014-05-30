@@ -98,8 +98,7 @@ class ResourceCalendar(EndpointsModel):
         today_events = self.get_today_events()
         now = datetime.datetime.now()
         for event in today_events:
-            if (event.original_start_date_time < now <
-                    event.original_end_date_time):
+            if (event.original_start_date_time < now < event.original_end_date_time and event.state != constants.STATE_FINISHED):
                 return event
         return None
 
