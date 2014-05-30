@@ -1,5 +1,5 @@
 application: www-ardux
-version: 11
+version: v20140530
 runtime: python27
 api_version: 1
 threadsafe: true
@@ -46,8 +46,8 @@ handlers:
   upload: ardux/static/robots.txt
 
 - url: /
-  static_files: ardux/static/html/index.html
-  upload: ardux/static/html/index.html
+  static_files: ardux/static/html/landing.html
+  upload: ardux/static/html/landing.html
 
 - url: /client/web
   static_files: ardux/static/html/web_client.html
