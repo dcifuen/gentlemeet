@@ -80,6 +80,20 @@ class ResourceCalendar(EndpointsModel):
             ResourceEvent.resource_key == self.key
         ).fetch()
 
+    def get_next_events_today(self):
+        today = datetime.datetime.today()
+        now = datetime.datetime.now()
+        today_end = datetime.datetime.combine(
+            today, datetime.datetime.max.time())
+        # TODO: Cache the daily events results?
+        #Since two inequality filters are not possible, get today events
+        return ResourceEvent.query(
+            ResourceEvent.original_start_date_time > now,
+            ResourceEvent.original_start_date_time < today_end,
+            ResourceEvent.resource_key == self.key
+        ).fetch()
+
+
     def get_current_event(self):
         #Since two inequality filters are not possible, have to filter in memory
         today_events = self.get_today_events()

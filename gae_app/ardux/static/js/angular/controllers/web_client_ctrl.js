@@ -8,7 +8,7 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
 
 
     $scope.events_today_resource = function(){
-        endpointsService.eventsTodayResource ({'id':$scope.calendarId},
+        endpointsService.nextEventsTodayResource ({'id':$scope.calendarId},
             function (response) {
                 if(response.error){
                     $scope.eventsList = []
