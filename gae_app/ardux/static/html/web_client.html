@@ -82,14 +82,24 @@
             <div id="footer" class="pure-g-r " ng-show="!actual_event">
 
                 <div id="getroom" class="pure-u-1">
-                    <a href="#" ng-click="quick_add()">Apartar<br/>sala</a>
+                    <a ng-show="!disable_quick_add" href="#"
+                       ng-click="quick_add()
+                    ">Apartar<br/>sala</a>
+                    <a ng-show="disable_quick_add" href="#" >
+                        Apartando sala <br/> Espere un momento
+                    </a>
                 </div>
 
             </div>
             <div id="footer" class="pure-g-r " ng-show="actual_event">
                 <div class="pure-u-1">
                     <div id="getroom" class="pure-u-1">
-                        <a href="#" ng-click="finish_event()">Finalizar</a>
+                        <a href="#" ng-show="!disable_finish_event"
+                           ng-click="finish_event()">Finalizar</a>
+                        <a href="#" ng-show="disable_finish_event">Finalizando Evento
+                            <br>
+                            Espere un momento
+                        </a>
                     </div>
                 </div>
             </div>
