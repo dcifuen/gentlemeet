@@ -5,6 +5,7 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
 
     $scope.countdownTimer = null;
     $scope.calendarId = '-60841444955'; //Should be device Id
+    $scope.disable_quick_add = false;
 
 
     $scope.events_today_resource = function(){
@@ -29,11 +30,15 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
     }
 
     $scope.quick_add = function(){
-        endpointsService.quickAddResource ({'id':$scope.calendarId},function (response) {
-            if(response.error){
-                console.log('Error in quick add', response);
-            }
-        });
+        if(!$scope.disable_quick_add){
+           $scope.disable_quick_add = true;
+            endpointsService.quickAddResource ({'id':$scope.calendarId},function (response) {
+                $scope.disable_quick_add = false;
+                if(response.error){
+                    console.log('Error in quick add', response);
+                }
+            });
+        }
     }
 
 
@@ -92,13 +97,15 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
 
 
     $scope.onTimeout = function(){
-        if($scope.actual_event.duration >0){
+        if($scope.actual_event && $scope.actual_event.duration >0){
             $scope.actual_event.duration--;
             $scope.countdownTimer = $timeout($scope.onTimeout, 1000);
         }else{
-            endpointsService.finishEvent({'id':$scope.actual_event.id}, function(response){
-                console.log('Event was finished')
-            });
+            if($scope.actual_event){
+                endpointsService.finishEvent({'id':$scope.actual_event.id}, function(response){
+                    console.log('Event was finished')
+                });
+            }
             $scope.actual_event = null;
         }
     }
