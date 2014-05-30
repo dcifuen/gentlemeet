@@ -6,7 +6,8 @@
             <form>
                 <fieldset>
                     <legend>Device [[ device.uuid ]]</legend>
-                    <span class="help-block">Last sync on: [[ device.last_sync]]</span>
+                    <span ng-show="device.last_sync" class="help-block">Last sync on: [[
+                        device.last_sync]]</span>
 
                     <div>
                         <label>Name: </label>
@@ -17,12 +18,17 @@
                         <select class="span3" ng-model="device.resource_id" ng-options="resource.id as resource.name for resource in resources">
                         </select>
                     </div>
+                    <div>
+                        <label>Type: </label>
+                        <select class="span3" ng-model="device.type" ng-options="type.id as type.name for type in types">
+                        </select>
+                    </div>
                     <div class="btn-group">
                         <button type="button" class="btn btn-primary" ng-click="saveDevice()">Save</button>
                     </div>
                 </fieldset>
             </form>
-            <table class="table">
+            <table ng-show="!events.length" class="table">
                 <legend>Events</legend>
                 <thead>
                 <th>Summary</th>
@@ -44,7 +50,7 @@
 
 {% block tail_js %}
     <script type="application/javascript">
-        window.device_uuid = '{{ device.uuid }}';
+        window.device_uuid = '{{ device.uuid if device.uuid != None else "" }}';
     </script>
     {{ super() }}
     <script type="text/javascript" src="/static/js/angular/controllers/deviceCtrl.js"></script>

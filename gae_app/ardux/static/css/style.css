@@ -77,23 +77,23 @@ a.pure-button-primary {
     background: #ddd;
 }
 
-#price {
+#team {
     padding: 30px;
     background: #ff8c65;
 }
 
-#price-title {
+#team-title {
     color: white;
 }
 
-.price-unit {
+.team-unit {
     background: #ff6e47;
     margin: 10px;
     padding: 10px;
     color: white;
 }
 
-#price-button {
+#team-button {
     background-color: #ff4e2d;
     border-radius: 1px;
     margin: 30px auto 10px;

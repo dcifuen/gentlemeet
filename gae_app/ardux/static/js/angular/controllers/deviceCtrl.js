@@ -1,18 +1,30 @@
 ardx_app.controller('deviceCtrl', ['$scope', '$window', '$http', 'EndpointsService', function ($scope, $window, $http, endpointsService) {
     $scope.device = {};
-    $scope.resources = []
-    $scope.events = []
+    $scope.resources = [];
+    $scope.types = [{
+        "id": "PHYSICAL",
+        "name": "Physical client"
+    },
+    {
+        "id": "WEB",
+        "name": "Web client"
+    }
+    ];
+    $scope.events = [];
     $scope.$on(endpointsService.ENDPOINTS_READY, function () {
         //load tags
         console.log("Endpoints ready...");
-        endpointsService.getDevice({'uuid_query': $window.device_uuid}, function (response) {
-            if (!response.error) {
-                $scope.device = response;
-                $scope.listEvents(response.resource_id);
-            } else {
-                console.error(response);
-            }
-        });
+        if ($window.device_uuid){
+            endpointsService.getDevice({'uuid_query': $window.device_uuid}, function (response) {
+                if (!response.error) {
+                    $scope.device = response;
+                    $scope.listEvents(response.resource_id);
+                } else {
+                    console.error(response);
+                }
+            });
+        }
+
         endpointsService.listResources({}, function (response) {
             if (!response.error) {
                 $scope.resources = response.items;
