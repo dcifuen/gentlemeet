@@ -29,6 +29,8 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.appspot.www_ardux.gentlemeet.Gentlemeet;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
 
 import javax.annotation.Nullable;
 
@@ -44,6 +46,9 @@ public class AppConstants {
      */
     public static final String WEB_CLIENT_ID = "233923764866.apps.googleusercontent.com";
 
+    public static final String  RESOURCE_ID = "resource_id";
+    public static final String  RESOURCE_NAME = "resource_name";
+
     /**
      * The audience is defined by the web client id, not the Android client id.
      */
@@ -52,7 +57,7 @@ public class AppConstants {
     /**
      * Class instance of the JSON factory.
      */
-    public static final JsonFactory JSON_FACTORY = new AndroidJsonFactory();
+    public static final JsonFactory JSON_FACTORY = new JacksonFactory();
 
     /**
      * Class instance of the HTTP transport.

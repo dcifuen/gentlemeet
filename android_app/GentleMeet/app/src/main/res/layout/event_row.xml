@@ -4,12 +4,11 @@
     android:padding="5dip" >
 
     <TextView
-        android:id="@+id/room_row_name"
+        android:id="@+id/eventName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
         android:gravity="center|left"
-        android:text="Sala 303"
         android:textColor="#000"
         android:typeface="sans"
         android:textSize="20dip"
@@ -19,22 +18,17 @@
         android:layout_alignParentTop="true"
         android:layout_marginLeft="2dp"
         android:layout_marginRight="2dp"
-        android:layout_above="@+id/rowTimer" />
+        android:layout_above="@+id/rowTimer"
+        android:singleLine="true"
+        />
 
-    <ImageView android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_action_navigation_next_item"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:baselineAlignBottom="true"
-        android:id="@+id/imageView" />
-
-    <co.falconlabs.gentlemeet.app.TimerView
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/no_event"
-        android:id="@+id/rowTimer"
-        android:layout_alignBottom="@+id/imageView"
-        android:textColor="#ffff8c65" />
+        android:id="@+id/eventSubname"
+        android:textColor="#ffff8c65"
+        android:layout_below="@+id/eventName"
+        android:layout_alignStart="@+id/eventName"
+        android:singleLine="true"/>
 
 </RelativeLayout>

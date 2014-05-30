@@ -1,13 +1,13 @@
 {
   "files": [
     {
-      "downloadUrl": "/downloads/gentlemeet/v1/20140524210427/java/1.18.0-rc/www_ardux_appspot_com-gentlemeet-v1-20140524210427-java-1.18.0-rc-sources.jar", 
-      "path": "www_ardux_appspot_com-gentlemeet-v1-20140524210427-java-1.18.0-rc-sources.jar", 
+      "downloadUrl": "/downloads/gentlemeet/v1/20140530041915/java/1.18.0-rc/www_ardux_appspot_com-gentlemeet-v1-20140530041915-java-1.18.0-rc-sources.jar", 
+      "path": "www_ardux_appspot_com-gentlemeet-v1-20140530041915-java-1.18.0-rc-sources.jar", 
       "type": "source", 
-      "timestamp": "2014-05-24 21:04"
+      "timestamp": "2014-05-30 04:19"
     }, 
     {
-      "path": "www_ardux_appspot_com-gentlemeet-v1-20140524210427-java-1.18.0-rc.jar.properties", 
+      "path": "www_ardux_appspot_com-gentlemeet-v1-20140530041915-java-1.18.0-rc.jar.properties", 
       "type": "android.properties"
     }
   ], 
@@ -674,5 +674,5 @@
   "version": "v1", 
   "language_version": "1.18.0-rc", 
   "id": "gentlemeet:v1", 
-  "revision": 20140524210427
+  "revision": 20140530041915
 }

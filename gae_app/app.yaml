@@ -49,6 +49,10 @@ handlers:
   static_files: ardux/static/html/landing.html
   upload: ardux/static/html/landing.html
 
+- url: /terms
+  static_files: ardux/static/html/terms.html
+  upload: ardux/static/html/terms.html
+
 - url: /client/web
   static_files: ardux/static/html/web_client.html
   upload: ardux/static/html/web_client.html
