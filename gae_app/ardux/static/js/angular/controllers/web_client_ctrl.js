@@ -113,7 +113,7 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
         if($scope.actual_event){
             var checkinURL = "/client/web/checkin?event_id=" + $scope.actual_event.id;
             if(isQR){
-                checkinURL = window.location.protocol + window.api_host + checkinURL;
+                checkinURL = window.location.protocol +'//' +  window.api_host + checkinURL;
                 return 'http://chart.apis.google.com/chart?cht=qr&chs=150x150&chl='+checkinURL+'&chld=H|0';
             }else{
                 return checkinURL;
