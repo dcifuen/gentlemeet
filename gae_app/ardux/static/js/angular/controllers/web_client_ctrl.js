@@ -10,7 +10,6 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
     $scope.events_today_resource = function(){
         endpointsService.eventsTodayResource ({'id':$scope.calendarId},
             function (response) {
-                console.log("error",response);
                 if(response.error){
                     $scope.eventsList = []
                 }else{
@@ -29,10 +28,19 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
         );
     }
 
+    $scope.quick_add = function(){
+        endpointsService.quickAddResource ({'id':$scope.calendarId},function (response) {
+            if(response.error){
+                console.log('Error in quick add', response);
+            }
+        });
+    }
+
+
+
     $scope.event_current_resource = function(){
         endpointsService.eventCurrentResource({'id':$scope.calendarId},
             function(response){
-                console.log(response);
                 if(response.error){
                     $scope.actual_event = null;
                 }else{
