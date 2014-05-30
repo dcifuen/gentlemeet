@@ -39,7 +39,7 @@ class GentleMeetApi(remote.Service):
                            http_method='GET',
                            name='device.get')
     def ResourceDeviceGet(self, device):
-        logging.info(device.to_dict())
+        logging.info("Getting device list [%s]" % device.to_dict())
         return device
 
     @ResourceDevice.method(path='device/{uuid_query}',
