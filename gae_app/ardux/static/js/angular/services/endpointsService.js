@@ -34,12 +34,26 @@ gApp.service('EndpointsService', function ($q, $rootScope, $http, $window, reque
      */
     service.loadService = function (api, version, callback) {
         service.total_apis += 1;
-        var apiRoot = $window.api_host + '/_ah/api';
-        if (apiRoot.indexOf("localhost") >= 0) {
-            apiRoot = "http://" + apiRoot;
-        } else {
-            apiRoot = "https://" + apiRoot;
+        service.apiName = api;
+        service.apiVersion = version;
+        //Check whether in production, staging or local
+        var isProduction = (window.location.host == 'www-ardux.appspot.com') || ( window.location.host == 'gentlemeet.co');
+        var isStaging = window.location.host.indexOf("-staging") != -1;
+        var serverURL = window.location.host;
+        if (isProduction){
+            serverURL = 'www-ardux.appspot.com';
+        } else if(isStaging){
+            serverURL = serverURL.replace('-staging.', '-staging-dot-');
         }
+        console.log('Is in production? ['+ isProduction +'] staging? ['+isStaging+'] Server URL ['+serverURL+']');
+
+        var apiRoot = '';
+        if (isProduction || isStaging){
+            apiRoot= 'https://' + serverURL + '/_ah/api';
+        } else {
+            apiRoot= '//' + window.location.host + '/_ah/api';
+        }
+
         gapi.client.load(api, version, function () {
             var apiUrl = '';
             $http.get(apiRoot + '/discovery/v1/apis/' + api + '/' + version + '/rest').success(function (data) {
