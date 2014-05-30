@@ -79,7 +79,7 @@ class CalendarHelper(OAuthServiceHelper):
             sendNotifications=True,
         ).execute()
 
-    def add_event_attendees(self, calendar_id, envent_id, attendees=[]):
+    def add_event_attendees(self, calendar_id, envent_id, attendees=list()):
         event = {'id': envent_id}
         attendees_list = [{'email': attendee} for attendee in attendees]
         event.update({'attendees': attendees_list})
@@ -87,28 +87,9 @@ class CalendarHelper(OAuthServiceHelper):
                                             eventId=event['id'],
                                             body=event).execute()
 
-    def update_calendar_event(self, calendar_id, envent_id, summary, start_date,
-                              end_date):
-        event = {'id': envent_id}
-        event.update({
-            'start': {'dateTime': start_date.strftime(
-                constants.CALENDAR_DATE_FORMAT),
-                      'timeZone': "UTC"}
-        })
-        event.update({
-            'end': {'dateTime': end_date.strftime(
-                constants.CALENDAR_DATE_FORMAT),
-                    'timeZone': "UTC"}
-        })
-        event.update({'summary': summary})
-        return self.service.events().update(calendarId=calendar_id,
-                                            eventId=event['id'],
-                                            body=event).execute()
-
-
-    def insert_or_update_event(self, calendar_id, summary, start_date,
-                               end_date, description=None, location=None,
-                               attendees=[], event_id=None):
+    def insert_or_update_event(self, calendar_id, summary=None, start_date=None,
+                               end_date=None, description=None, location=None,
+                               attendees=list(), event_id=None):
         if event_id:
             event = self.service.events().get(calendarId=calendar_id,
                                               eventId=event_id).execute()
@@ -120,12 +101,18 @@ class CalendarHelper(OAuthServiceHelper):
             event.update({'description': description})
         if location:
             event.update({'location': location})
-        event.update({'attendees': attendees_list})
-        event.update({'start': {
-        'dateTime': start_date.strftime(constants.CALENDAR_DATE_FORMAT)}})
-        event.update({
-        'end': {'dateTime': end_date.strftime(constants.CALENDAR_DATE_FORMAT)}})
-        event.update({'summary': summary})
+        if len(attendees_list) > 0 :
+            event.update({'attendees': attendees_list})
+        if start_date:
+            event.update({'start': {
+                'dateTime': start_date.strftime(constants.CALENDAR_DATE_TIME),
+                'timeZone': "UTC"}})
+        if end_date:
+            event.update({
+                'end': {'dateTime': end_date.strftime(constants.CALENDAR_DATE_TIME),
+                        'timeZone': "UTC"}})
+        if summary:
+            event.update({'summary': summary})
         if event_id:
             return self.service.events().update(calendarId=calendar_id,
                                                 sendNotifications=True,
@@ -138,10 +125,10 @@ class CalendarHelper(OAuthServiceHelper):
 
     def is_calendar_available(self, calendar_id, start_date, end_date):
         response = self.service.freebusy().query(
-            body={'timeMin': start_date.strftime(constants.CALENDAR_DATE_FORMAT),
-                  'timeMax': end_date.strftime(constants.CALENDAR_DATE_FORMAT),
+            body={'timeMin': start_date.strftime(constants.CALENDAR_DATE_TIME),
+                  'timeMax': end_date.strftime(constants.CALENDAR_DATE_TIME),
                   'items': [{'id': calendar_id}]
-        }).execute()
+            }).execute()
         return len(response['calendars'][calendar_id]['busy']) == 0
 
     def get_event(self, calendar_id, even_id):
@@ -151,7 +138,7 @@ class CalendarHelper(OAuthServiceHelper):
     def list_events(self, calendar_id, **kwargs):
         events = []
         page_token = None
-        #TODO: Pagination the right way
+        # TODO: Pagination the right way
         while True:
             if page_token:
                 tem_events = self.service.events().list(
@@ -170,7 +157,7 @@ class CalendarHelper(OAuthServiceHelper):
         return events
 
     def clear_calendar(self, calendar_id):
-        events = self.retrieve_all_events(calendar_id)
+        events = self.list_events(calendar_id)
         logging.info("Deleting all calendar events")
         for event in events:
             self.delete_calentar_event(calendar_id, event['id'])

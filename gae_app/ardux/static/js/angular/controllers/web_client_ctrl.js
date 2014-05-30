@@ -5,15 +5,12 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
 
     $scope.countdownTimer = null;
     $scope.calendarId = '-60841444955'; //Should be device Id
-
-    $scope.$on(endpointsService.ENDPOINTS_READY, function () {
-        //load tags
-        console.log("Endpoints ready...");
+    $scope.disable_quick_add = false;
 
 
-        endpointsService.eventsTodayResource ({'id':$scope.calendarId},
+    $scope.events_today_resource = function(){
+        endpointsService.nextEventsTodayResource ({'id':$scope.calendarId},
             function (response) {
-                console.log("error",response);
                 if(response.error){
                     $scope.eventsList = []
                 }else{
@@ -30,8 +27,21 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
                 }
             }
         );
+    }
 
+    $scope.quick_add = function(){
+        if(!$scope.disable_quick_add){
+           $scope.disable_quick_add = true;
+            endpointsService.quickAddResource ({'id':$scope.calendarId},function (response) {
+                $scope.disable_quick_add = false;
+                if(response.error){
+                    console.log('Error in quick add', response);
+                }
+            });
+        }
+    }
 
+    $scope.event_current_resource = function(){
         endpointsService.eventCurrentResource({'id':$scope.calendarId},
             function(response){
                 if(response.error){
@@ -40,9 +50,6 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
                     var startTime = new Date(response.start_date_time);
                     var endTime = new Date(response.end_date_time);
                     var now = new Date();
-                    console.log('now',now);
-                    console.log('endTime',endTime);
-                    console.log('endTime - now',endTime - now);
 
                     response.duration = (endTime - now) / 1000
                     response.checkinURL = '';
@@ -63,19 +70,48 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
                         response.total_attendees = response.total_attendees.concat()
                     }
 
+                    if(!$scope.actual_event ||
+                        ($scope.actual_event && response.id && response.id != $scope.actual_event.id)
+                      ){
+                        $scope.actual_event = response;
+                        $scope.countdownTimer  = $timeout($scope.onTimeout, 1000);
+                    }
 
-
-                    $scope.actual_event = response;
-                    $scope.countdownTimer  = $timeout($scope.onTimeout, 1000);
                 }
             }
         );
+    }
+
+
+    $scope.$on(endpointsService.ENDPOINTS_READY, function () {
+        //load tags
+        console.log("Endpoints ready...");
+        $scope.events_today_resource();
+        $scope.event_current_resource();
+
+        setInterval($scope.events_today_resource,2000);
+        setInterval($scope.event_current_resource,30000);
     });
 
+
     $scope.onTimeout = function(){
-        if($scope.actual_event.duration >0){
+        if($scope.actual_event && $scope.actual_event.duration >0){
             $scope.actual_event.duration--;
             $scope.countdownTimer = $timeout($scope.onTimeout, 1000);
+        }else{
+            $scope.finish_event();
+            $scope.actual_event = null;
+        }
+    }
+
+    $scope.finish_event= function(){
+        if($scope.actual_event){
+            endpointsService.finishEvent({'id':$scope.actual_event.id}, function(response){
+
+                console.log(response);
+
+                console.log('Event was finished')
+            });
         }
     }
 
@@ -89,13 +125,13 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
         if($scope.actual_event){
             var checkinURL = "/client/web/checkin?event_id=" + $scope.actual_event.id;
             if(isQR){
-                checkinURL = window.location.protocol + window.api_host + checkinURL;
+                checkinURL = window.location.protocol +'//' +  window.api_host + checkinURL;
                 return 'http://chart.apis.google.com/chart?cht=qr&chs=150x150&chl='+checkinURL+'&chld=H|0';
             }else{
                 return checkinURL;
             }
         }else{
-            return '';
+            return '#';
         }
     }
 

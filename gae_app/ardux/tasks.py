@@ -87,7 +87,6 @@ def sync_resource_events(resource_id, resource_email):
                     event_db.original_end_date_time = pytz.utc.normalize(
                         parse(event['end']['dateTime'])).replace(tzinfo=None)
 
-
                     no_response_attendees = []
                     maybe_attendees = []
                     yes_attendees= []
