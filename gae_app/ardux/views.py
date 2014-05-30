@@ -16,7 +16,6 @@ from flask.helpers import url_for
 from flask.templating import render_template
 from ardux.models import ResourceDevice
 import flask
-from models import ResourceEvent, ResourceCalendar
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
 import constants
@@ -40,7 +39,7 @@ def warmup():
 
 @app.route('/device/register', methods=['GET', 'POST'])
 def device_register():
-    device = ResourceDevice(uuid=''.join(
+    device = ResourceDevice(type=constants.TYPE_WEB, uuid=''.join(
         random.choice(string.ascii_uppercase + string.digits) for x in
         range(5)))
     device.put();
@@ -49,10 +48,10 @@ def device_register():
 
 @app.route('/device/sync/<uuid>')
 def device_sync(uuid):
-    device = ResourceDevice.query(ResourceDevice.uuid == uuid).fetch(1)[0]
-    device.last_sync = datetime.datetime.now()
-    device.put()
+    device = ResourceDevice.query(ResourceDevice.uuid == uuid).get()
     if device:
+        device.last_sync = datetime.datetime.now()
+        device.put()
         return flask.jsonify(device.to_dict(exclude=('resource_key',)))
     else:
         return 'Device not found', 404
@@ -60,7 +59,7 @@ def device_sync(uuid):
 
 @app.route('/cron/sync/resources')
 def resources_sync():
-    logging.info("Scheduling sync task")
+    logging.info("Scheduling calendars and events sync task...")
     deferred.defer(sync_resources)
     return "Scheduling sync task..."
 
@@ -72,7 +71,7 @@ def sign_out():
 
 @app.route('/signin')
 def sign_in():
-# Create a state token to prevent request forgery.
+    # Create a state token to prevent request forgery.
     # Store it in the session for later validation.
     state = ''.join(random.choice(string.ascii_uppercase + string.digits) for
                     x in xrange(32))
@@ -91,7 +90,6 @@ def connect():
     store the token in the session."""
     # Ensure that the request is not a forgery and that the user sending
     # this connect request is the expected user.
-
 
     if request.args.get('state', '') != session['state']:
         response = make_response(json.dumps('Invalid state parameter.'), 401)
@@ -196,30 +194,3 @@ def page_not_found(e):
 def page_error(e):
     logging.error('500 error: %s', e)
     return render_template('500.html'), 500
-
-@app.route('/test/populate/')
-def populate():
-    calendar_key = ResourceCalendar(
-        name='Room 1',
-        email='room1@eforcers.com.co',
-        description='Room for meetings'
-    ).put()
-
-    ResourceEvent(
-        organizer='administrador@eforcers.com.co',
-        original_start_date_time=datetime.datetime.now() +
-                               datetime.timedelta(minutes=5),
-        original_end_date_time=datetime.datetime.now() +
-                               datetime.timedelta(hours=3),
-        resource_key=calendar_key,
-        summary='Test event summary',
-        title='Test event',
-        state=constants.STATE_SCHEDULED,
-        is_express=False
-    ).put()
-
-    ResourceDevice(
-        name="DeviceTest", uuid="1", type=constants.TYPE_WEB,
-        resource_key=calendar_key, state=constants.STATE_ACTIVE
-    ).put()
-    return 'Populated!'

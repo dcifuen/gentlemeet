@@ -122,10 +122,10 @@ class ResourceDevice(EndpointsModel):
         'name', 'uuid', 'uuid_query', 'type', 'state', 'last_sync', 'online',
         'resource_id', 'resource')
 
-    name = ndb.StringProperty()
-    uuid = ndb.StringProperty(required=True, indexed=False)
+    name = ndb.StringProperty(indexed=False)
+    uuid = ndb.StringProperty(required=True)
     type = ndb.StringProperty(choices=constants.DEVICE_CHOICES,
-                              required=True, indexed=False)
+                              indexed=False)
     # TODO: Refactor states to use Fysom
     state = ndb.StringProperty(choices=constants.DEVICE_STATE_CHOICES,
                                indexed=False)
@@ -146,7 +146,7 @@ class ResourceDevice(EndpointsModel):
     @EndpointsAliasProperty(setter=ResourceSet)
     def resource_id(self):
         if self.resource_key:
-            return self.resource_key.id()
+            return self.resource_key.string_id()
         else:
             return None
 
@@ -168,11 +168,7 @@ class ResourceDevice(EndpointsModel):
 
     @staticmethod
     def get_by_uuid(uuid):
-        devices = ResourceDevice.query(ResourceDevice.uuid == uuid).fetch()
-        if len(devices) > 0:
-            return devices[0]
-        else:
-            return None
+        return ResourceDevice.query(ResourceDevice.uuid == uuid).get()
 
     def to_dict(self, *args, **kwargs):
         result = super(ResourceDevice, self).to_dict(*args, **kwargs)

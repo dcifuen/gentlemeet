@@ -68,7 +68,7 @@ with flask_app.app_context():
 
     admin.add_view(admin_views.DevicesView(
         name='Devices',
-        endpoint='devices',
+        endpoint='device',
     ))
 
     admin.add_view(admin_views.OAuthView(

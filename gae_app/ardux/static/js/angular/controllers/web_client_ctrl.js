@@ -5,7 +5,11 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
 
     $scope.countdownTimer = null;
     $scope.calendarId = '-60841444955'; //Should be device Id
+
     $scope.disable_quick_add = false;
+    $scope.disable_finish_event = false;
+
+
 
 
     $scope.events_today_resource = function(){
@@ -33,7 +37,6 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
         if(!$scope.disable_quick_add){
            $scope.disable_quick_add = true;
             endpointsService.quickAddResource ({'id':$scope.calendarId},function (response) {
-                $scope.disable_quick_add = false;
                 if(response.error){
                     console.log('Error in quick add', response);
                 }
@@ -47,6 +50,7 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
                 if(response.error){
                     $scope.actual_event = null;
                 }else{
+                    $scope.disable_quick_add = false;
                     var startTime = new Date(response.start_date_time);
                     var endTime = new Date(response.end_date_time);
                     var now = new Date();
@@ -73,10 +77,10 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
                     if(!$scope.actual_event ||
                         ($scope.actual_event && response.id && response.id != $scope.actual_event.id)
                       ){
+                        $scope.disable_finish_event = false;
                         $scope.actual_event = response;
                         $scope.countdownTimer  = $timeout($scope.onTimeout, 1000);
                     }
-
                 }
             }
         );
@@ -105,6 +109,7 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
     }
 
     $scope.finish_event= function(){
+        $scope.disable_finish_event = true;
         if($scope.actual_event){
             endpointsService.finishEvent({'id':$scope.actual_event.id}, function(response){
 
