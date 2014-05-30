@@ -8,6 +8,7 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
 
     $scope.disable_quick_add = false;
     $scope.disable_finish_event = false;
+    $scope.loading_aux = true;
 
 
 
@@ -15,6 +16,7 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
     $scope.events_today_resource = function(){
         endpointsService.nextEventsTodayResource ({'id':$scope.calendarId},
             function (response) {
+                $scope.loading_aux = false;
                 if(response.error){
                     $scope.eventsList = []
                 }else{
