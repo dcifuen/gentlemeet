@@ -159,6 +159,7 @@ class GentleMeetApi(remote.Service):
     def finish_event(self, request):
         """
         Mark an event as finished and set the actual end time as right now.
+        Updates the Google Calendar event accordingly.
         """
         logging.info('Someone just marked event ID [%s] as finished',
                      request.id)
@@ -171,6 +172,28 @@ class GentleMeetApi(remote.Service):
         event.state = constants.STATE_FINISHED
         event.actual_end_date_time = datetime.now()
         event.put()
+        resource = event.resource_key.get()
+
+        # Create event in Google Calendar
+        client = Client.get_by_id(1)
+        if not client or not client.credentials or not client.refresh_token:
+            raise endpoints.BadRequestException(
+                'Domain calendar access is not yet configured')
+        try:
+            calendar_helper = CalendarHelper(
+                client.credentials, client.refresh_token
+            )
+            calendar_helper.insert_or_update_event(
+                calendar_id=resource.email,
+                start_date=event.start_date_time,
+                end_date=datetime.now(),
+                event_id=event.key.string_id()
+            )
+        except:
+            logging.exception('Exception while updating the GCal event')
+            raise endpoints.BadRequestException(
+                'Unable to update the Google Calendar event')
+
         return event_db_to_rcp(event)
 
 
@@ -251,16 +274,20 @@ class GentleMeetApi(remote.Service):
         if not client or not client.credentials or not client.refresh_token:
             raise endpoints.BadRequestException(
                 'Domain calendar access is not yet configured')
-
-        calendar_helper = CalendarHelper(
-            client.credentials, client.refresh_token
-        )
-        calendar_event = calendar_helper.insert_or_update_event(
-            calendar_id=resource.email, summary=constants.QUICK_ADD_TITLE,
-            description=constants.QUICK_ADD_DESCRIPTION, start_date=now,
-            end_date=end_time,
-            location=resource.name
-        )
+        try:
+            calendar_helper = CalendarHelper(
+                client.credentials, client.refresh_token
+            )
+            calendar_event = calendar_helper.insert_or_update_event(
+                calendar_id=resource.email, summary=constants.QUICK_ADD_TITLE,
+                description=constants.QUICK_ADD_DESCRIPTION, start_date=now,
+                end_date=end_time,
+                location=resource.name
+            )
+        except:
+            logging.exception('Exception while creating the GCal event')
+            raise endpoints.BadRequestException(
+                'Unable to create the Google Calendar event')
         # Save in datastore
         resource_event = ResourceEvent(
             organizer=client.installer_user,

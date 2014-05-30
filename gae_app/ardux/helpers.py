@@ -87,25 +87,8 @@ class CalendarHelper(OAuthServiceHelper):
                                             eventId=event['id'],
                                             body=event).execute()
 
-    def update_calendar_event(self, calendar_id, envent_id, summary, start_date,
-                              end_date):
-        event = {'id': envent_id}
-        event.update({
-            'start': {'dateTime': start_date.strftime(constants.CALENDAR_DATE_TIME),
-                      'timeZone': "UTC"}
-        })
-        event.update({
-            'end': {'dateTime': end_date.strftime(constants.CALENDAR_DATE_TIME),
-                    'timeZone': "UTC"}
-        })
-        event.update({'summary': summary})
-        return self.service.events().update(calendarId=calendar_id,
-                                            eventId=event['id'],
-                                            body=event).execute()
-
-
-    def insert_or_update_event(self, calendar_id, summary, start_date,
-                               end_date, description=None, location=None,
+    def insert_or_update_event(self, calendar_id, summary=None, start_date=None,
+                               end_date=None, description=None, location=None,
                                attendees=list(), event_id=None):
         if event_id:
             event = self.service.events().get(calendarId=calendar_id,
@@ -118,14 +101,18 @@ class CalendarHelper(OAuthServiceHelper):
             event.update({'description': description})
         if location:
             event.update({'location': location})
-        event.update({'attendees': attendees_list})
-        event.update({'start': {
-            'dateTime': start_date.strftime(constants.CALENDAR_DATE_TIME),
-            'timeZone': "UTC"}})
-        event.update({
-            'end': {'dateTime': end_date.strftime(constants.CALENDAR_DATE_TIME),
-                    'timeZone': "UTC"}})
-        event.update({'summary': summary})
+        if len(attendees_list) > 0 :
+            event.update({'attendees': attendees_list})
+        if start_date:
+            event.update({'start': {
+                'dateTime': start_date.strftime(constants.CALENDAR_DATE_TIME),
+                'timeZone': "UTC"}})
+        if end_date:
+            event.update({
+                'end': {'dateTime': end_date.strftime(constants.CALENDAR_DATE_TIME),
+                        'timeZone': "UTC"}})
+        if summary:
+            event.update({'summary': summary})
         if event_id:
             return self.service.events().update(calendarId=calendar_id,
                                                 sendNotifications=True,
