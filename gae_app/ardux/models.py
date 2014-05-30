@@ -91,8 +91,7 @@ class ResourceCalendar(EndpointsModel):
             ResourceEvent.original_start_date_time > now,
             ResourceEvent.original_start_date_time < today_end,
             ResourceEvent.resource_key == self.key
-        ).fetch()
-
+        ).fetch(5)
 
     def get_current_event(self):
         #Since two inequality filters are not possible, have to filter in memory
