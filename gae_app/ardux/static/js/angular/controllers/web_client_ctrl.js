@@ -10,9 +10,6 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
     $scope.disable_finish_event = false;
     $scope.loading_aux = true;
 
-
-
-
     $scope.events_today_resource = function(){
         endpointsService.nextEventsTodayResource ({'id':$scope.calendarId},
             function (response) {
@@ -76,12 +73,24 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
                         response.total_attendees = response.total_attendees.concat()
                     }
 
+                    if(response.actual_attendees){
+                        for(var i in response.actual_attendees){
+                            attendee = response.actual_attendees[i];
+                            if(response.total_attendees.indexOf(attendee) < 0){
+                              response.total_attendees.push(attendee);
+                            }
+                        }
+                    }
+
                     if(!$scope.actual_event ||
                         ($scope.actual_event && response.id && response.id != $scope.actual_event.id)
                       ){
                         $scope.disable_finish_event = false;
                         $scope.actual_event = response;
                         $scope.countdownTimer  = $timeout($scope.onTimeout, 1000);
+                    }else if($scope.actual_event){
+                        $scope.actual_event.total_attendees = response.total_attendees;
+                        $scope.actual_attendees = response.actual_attendees;
                     }
                 }
             }
