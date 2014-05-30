@@ -1,7 +1,7 @@
 {% extends 'base_angular.html' %}
 {% block angular_content %}
     <div ng-controller="devicesCtrl">
-        <button id="newSessionButton" type="button" class="btn btn-primary col-md-12" ng-click="openSessionForm('{{ url_for('device.device_add')}}')"
+        <button id="newSessionButton" type="button" class="btn btn-primary col-md-12" onclick='window.location = "{{ url_for('device.device_add')}}"'
                       bs-button>
                         + New Device
                 </button>
@@ -13,7 +13,7 @@
             </thead>
             <tbody>
             <tr ng-repeat="device in devices">
-                <td><a href="/admin/devices/device/[[device.uuid]]"> [[ device.uuid ]]</a></td>
+                <td><a href="/admin/device/[[device.uuid]]/"> [[ device.uuid ]]</a></td>
                 <td>[[ device.name ]]</td>
                 <td>[[ device.online ]]</td>
             </tr>
