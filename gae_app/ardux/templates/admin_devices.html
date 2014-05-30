@@ -1,6 +1,10 @@
 {% extends 'base_angular.html' %}
 {% block angular_content %}
     <div ng-controller="devicesCtrl">
+        <button id="newSessionButton" type="button" class="btn btn-primary col-md-12" ng-click="openSessionForm('{{ url_for('device.device_add')}}')"
+                      bs-button>
+                        + New Device
+                </button>
         <table class="table">
             <thead>
             <th>UUID</th>

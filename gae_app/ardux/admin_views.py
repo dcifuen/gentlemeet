@@ -36,7 +36,11 @@ class DevicesView(BaseView):
     def index(self):
         return self.render('admin_devices.html')
 
-    @expose('/device/<uuid>')
+    @expose('/add/')
+    def device_add(self):
+        return self.render('admin_device.html', device=ResourceDevice())
+
+    @expose('/<uuid>/')
     def device_edit(self, uuid):
         device = ResourceDevice.get_by_uuid(uuid)
         if device:
