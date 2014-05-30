@@ -31,13 +31,13 @@ ardx_app.service('EndpointsService',function($q, $rootScope, $http, $window) {
         service.apiVersion = version;
 
         //Check whether in production, staging or local
-        var isProduction = (window.location.host == 'www-ardux.appspot.com') || ( window.location.host == 'gentlemeet.co');
+        var isProduction = (window.location.host.indexOf('www-ardux.appspot.com') >= 0 || ( window.location.host == 'gentlemeet.co'));
         var isStaging = window.location.host.indexOf("-staging") != -1;
         var serverURL = window.location.host;
-        if (isProduction){
-            serverURL = 'www-ardux.appspot.com';
-        } else if(isStaging){
+        if(isStaging){
             serverURL = serverURL.replace('-staging.', '-staging-dot-');
+        } else if(isProduction){
+            serverURL = 'www-ardux.appspot.com';
         }
         console.log('Is in production? ['+ isProduction +'] staging? ['+isStaging+'] Server URL ['+serverURL+']');
 
