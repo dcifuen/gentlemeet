@@ -24,20 +24,21 @@
 
 <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css">
 <link rel="stylesheet" href="/static/css/style.css">
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
 </head>
-<body>
+<body data-spy="scroll" data-target="#gentlemenu">
 <div class="header">
   <div class="home-menu pure-menu pure-menu-open pure-menu-horizontal pure-menu-fixed"> <a class="pure-menu-heading" href="#"><img src="/static/img/GentleMeet-logo.png" width="211" height="67" alt="GentleMeet - Logo"></a>
-    <ul id="gentlemenu">
-      <li class="pure-menu-selected"><a href="#">Home</a></li>
-      <li><a href="#">Nosotros</a></li>
-      <li><a href="#">Beneficios</a></li>
-      <li><a href="#">Equipo</a></li>
-      <li><a href="#"><img src="/static/img/user-log.png" width="35" height="37" alt="User- Log"></a></li>
+    <ul id="gentlemenu" class="nav navbar-nav">
+      <li><a class="pure-menu-selected" href="#home">Home</a></li>
+      <li><a href="#benefits">Beneficios</a></li>
+      <li><a href="#team">Equipo</a></li>
+      <li><img src="/static/img/user-log.png" width="35" height="37" alt="User- Log"></li>
     </ul>
   </div>
 </div>
-<div class="splash-container">
+<div id="home" class="splash-container">
   <div class="splash">
     <h1 class="splash-head">Reservas sin demoras</h1>
     <p class="splash-subhead"> GentleMeet es la solución perfecta para ambientes empresariales que cuentan con salas de reuniones que requieren un control efectivo de su uso y ocupación. </p>
@@ -65,7 +66,7 @@
     </div>
     
     
-    <h2 class="content-head is-center">Beneficios.</h2>
+    <h2 id="benefits" class="content-head is-center">Beneficios.</h2>
     <div class="pure-g">
       <div class="l-box pure-u-1 pure-u-med-1-2 pure-u-lrg-1-4">
         <h3 class="content-subhead">Guardián </h3>
@@ -93,23 +94,23 @@
       <p> Al incorporar <strong>GentleMeet</strong> en su organización, Usted garantiza que el uso de las salas de reuniones sea óptimo y más efectivo. </p>
     </div>
   </div>
-  <div id="price" class="pure-g-r">
+  <div id="team" class="pure-g-r">
     <div class="pure-u-1-1">
-      <h2 class="content-head is-center" id="price-title"> Equipo</h2>
+      <h2 class="content-head is-center" id="team-title"> Equipo</h2>
     </div>
     <div class="pure-u-1-3" >
-      <div class="price-unit">
-        <h3 id="price-title">Lorem ipsum dolor</h3>
+      <div class="team-unit">
+        <h3 id="team-title">Lorem ipsum dolor</h3>
         Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.  </div>
     </div>
     <div class="pure-u-1-3" >
-     <div class="price-unit">
-        <h3 id="price-title">Lorem ipsum dolor</h3>
+     <div class="team-unit">
+        <h3 id="team-title">Lorem ipsum dolor</h3>
         Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.  </div>
     </div>
     <div class="pure-u-1-3" >
-    <div class="price-unit">
-        <h3 id="price-title">Lorem ipsum dolor</h3>
+    <div class="team-unit">
+        <h3 id="team-title">Lorem ipsum dolor</h3>
         Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. </div>
     </div>
   </div>
