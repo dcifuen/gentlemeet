@@ -5,12 +5,12 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
 
     $scope.countdownTimer = null;
     $scope.calendarId = '-60841444955'; //Should be device Id
+    $scope.disable_quick_add = false;
 
 
     $scope.events_today_resource = function(){
         endpointsService.nextEventsTodayResource ({'id':$scope.calendarId},
             function (response) {
-                console.log("error",response);
                 if(response.error){
                     $scope.eventsList = []
                 }else{
@@ -29,10 +29,23 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
         );
     }
 
+    $scope.quick_add = function(){
+        if(!$scope.disable_quick_add){
+           $scope.disable_quick_add = true;
+            endpointsService.quickAddResource ({'id':$scope.calendarId},function (response) {
+                $scope.disable_quick_add = false;
+                if(response.error){
+                    console.log('Error in quick add', response);
+                }
+            });
+        }
+    }
+
+
+
     $scope.event_current_resource = function(){
         endpointsService.eventCurrentResource({'id':$scope.calendarId},
             function(response){
-                console.log(response);
                 if(response.error){
                     $scope.actual_event = null;
                 }else{
@@ -84,13 +97,15 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
 
 
     $scope.onTimeout = function(){
-        if($scope.actual_event.duration >0){
+        if($scope.actual_event && $scope.actual_event.duration >0){
             $scope.actual_event.duration--;
             $scope.countdownTimer = $timeout($scope.onTimeout, 1000);
         }else{
-            endpointsService.finishEvent({'id':$scope.actual_event.id}, function(response){
-                console.log('Event was finished')
-            });
+            if($scope.actual_event){
+                endpointsService.finishEvent({'id':$scope.actual_event.id}, function(response){
+                    console.log('Event was finished')
+                });
+            }
             $scope.actual_event = null;
         }
     }
@@ -105,13 +120,13 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
         if($scope.actual_event){
             var checkinURL = "/client/web/checkin?event_id=" + $scope.actual_event.id;
             if(isQR){
-                checkinURL = window.location.protocol + window.api_host + checkinURL;
+                checkinURL = window.location.protocol +'//' +  window.api_host + checkinURL;
                 return 'http://chart.apis.google.com/chart?cht=qr&chs=150x150&chl='+checkinURL+'&chld=H|0';
             }else{
                 return checkinURL;
             }
         }else{
-            return '';
+            return '#';
         }
     }
 
