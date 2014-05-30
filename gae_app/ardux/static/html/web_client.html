@@ -1,133 +1,133 @@
 <html>
-    <head>
-        <meta charset="utf-8">
-        <title>GentleMeet</title>
+<head>
+    <meta charset="utf-8">
+    <title>GentleMeet</title>
 
-        <!-- css-->
-        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+    <!-- css-->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
 
-        <!-- js libraries -->
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/moment-with-langs.min.js"></script>
-        <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
-        <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular.min.js"></script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.10.0/ui-bootstrap.js"></script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.10.0/ui-bootstrap-tpls.js"></script>
-        <link rel="author" href="https://github.com/angular-ui/bootstrap/graphs/contributors">
+    <!-- js libraries -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/moment-with-langs.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.10.0/ui-bootstrap.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.10.0/ui-bootstrap-tpls.js"></script>
+    <link rel="author" href="https://github.com/angular-ui/bootstrap/graphs/contributors">
 
-        <!-- gentlemeet js -->
-        <script src="/static/js/angular/gentlemeet.js"></script>
-        <script src="/static/js/angular/directives/directives.js"></script>
-        <script src="/static/js/angular/services/endpointsService.js"></script>
-        <script src="/static/js/angular/controllers/web_client_ctrl.js"></script>
-        <script type="application/javascript">
+    <!-- gentlemeet js -->
+    <script src="/static/js/angular/gentlemeet.js"></script>
+    <script src="/static/js/angular/directives/directives.js"></script>
+    <script src="/static/js/angular/services/endpointsService.js"></script>
+    <script src="/static/js/angular/controllers/web_client_ctrl.js"></script>
+    <script type="application/javascript">
 
-            var host_name_array = window.location.host.split('.');
-            if(window.location.host.indexOf('appspot') &&
-                    host_name_array.length > 3){
-                window.api_host = host_name_array[0] + '-dot-';
-                for(index = 1; index < host_name_array.length; index++ ){
-                    window.api_host += host_name_array[index];
-                }
-            }else{
-                window.api_host = window.location.host;
+        var host_name_array = window.location.host.split('.');
+        if (window.location.host.indexOf('appspot') &&
+                host_name_array.length > 3) {
+            window.api_host = host_name_array[0] + '-dot-';
+            for (index = 1; index < host_name_array.length; index++) {
+                window.api_host += host_name_array[index];
             }
+        } else {
+            window.api_host = window.location.host;
+        }
 
 
-            window.loading_apis = false;
-            window.google_client_loaded = false;
-            function api_init() {
-                console.log("Initializing Endpoints Service");
-                window.apis = [
-                    {name: 'gentlemeet', version: 'v1'}
-                ];
+        window.loading_apis = false;
+        window.google_client_loaded = false;
+        function api_init() {
+            console.log("Initializing Endpoints Service");
+            window.apis = [
+                {name: 'gentlemeet', version: 'v1'}
+            ];
 
-                if (window.api_load && !window.loading_apis) {
-                    for (i in window.apis) {
-                        var api = window.apis[i];
-                        window.api_load(api.name, api.version);
-                    }
-                    window.loading_apis = true;
-                } else {
-                    window.google_client_loaded = true;
+            if (window.api_load && !window.loading_apis) {
+                for (i in window.apis) {
+                    var api = window.apis[i];
+                    window.api_load(api.name, api.version);
                 }
+                window.loading_apis = true;
+            } else {
+                window.google_client_loaded = true;
             }
-        </script>
-        <!-- Google endpoint js library -->
-        <script src="https://apis.google.com/js/client.js?onload=api_init"></script>
+        }
+    </script>
+    <!-- Google endpoint js library -->
+    <script src="https://apis.google.com/js/client.js?onload=api_init"></script>
 
-<link rel="stylesheet" href="/static/css/style.css">
-<link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.3.0/pure-min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.3.0/pure-min.css">
 
 
-
-    </head>
-    <body ng-app="gApp">
-        <div ng-controller="testCtrl">
+</head>
+<body ng-app="gApp">
+<div ng-controller="testCtrl">
+    <div class="pure-g-r">
+        <div class="pure-u-1-3" id="side-bar">
+            <div id="header" class="pure-g-r orange2">
+                <div class="pure-u-1">
+                    <img src="/static/img/GentleMeet-logo2.png">
+                </div>
+            </div>
             <div class="pure-g-r">
-                <div class="pure-u-1-3">
-                    <div id="header" class="pure-g-r orange2" >
-                       <div class="pure-u-1">
-                           <img src="/static/img/GentleMeet-logo2.png">
-                       </div>
-                    </div>
-                    <div class="pure-g-r">
 
-                       <div id="content" class="pure-u-1">
-                           Tiempo Restante:
-                           <h1 id="timer">
-                                {{getSecondsAsDate(actual_event.duration) | date:'H:mm:ss'}}
-                           </h1>
-                       </div>
-                    </div>
-                    <div id="footer" class="pure-g-r orange2"  ng-show="!actual_event">
+                <div id="content" class="pure-u-1">
+                    Tiempo Restante:
+                    <h1 id="timer">
+                        {{getSecondsAsDate(actual_event.duration) | date:'H:mm:ss'}}
+                    </h1>
+                </div>
+            </div>
+            <div id="footer" class="pure-g-r " ng-show="!actual_event">
 
-                           <div id="getroom" class="pure-u-1">
-                                    <a href="#" ng-click="">Apartar<br />sala</a>
-                           </div>
-
-                    </div>
-                    <div id="footer" class="pure-g-r orange2"  ng-show="actual_event">
-                       <div class="pure-u-1" >
-                             <div id="getroom" class="pure-u-1">
-                                    <a href="#" ng-click="">Finalizar</a>
-                           </div>                       </div>
-                    </div>
+                <div id="getroom" class="pure-u-1">
+                    <a href="#" ng-click="quick_add()">Apartar<br/>sala</a>
                 </div>
 
-                <div class="pure-u-1-3" ng-show="!actual_event">
-                   <br>
-                    <br>
-                    <br>
-                   <h2 id="event-title">
-                       En Estos momentos no hay evento
-                   </h2>
-                </div>
-
-                <div class="pure-u-2-3" ng-show="actual_event">
-                    <div class="pure-g">
-                        <div class="pure-u-1">
-                            <h2 id="event-title">
-                                {{actual_event.summary}}
-                            </h2>
-                            <h2>
-                                <strong>{{actual_event.startTimeAux|date:'hh:mm a'}}</strong>
-                                -
-                                <strong>{{actual_event.endTimeAux|date:'hh:mm a'}}</strong>
-
-                            </h2>
-
-                            <h4>
-                                {{actual_event.description}}
-                            </h4>
-                        </div>
+            </div>
+            <div id="footer" class="pure-g-r " ng-show="actual_event">
+                <div class="pure-u-1">
+                    <div id="getroom" class="pure-u-1">
+                        <a href="#" ng-click="finish_event()">Finalizar</a>
                     </div>
-                    <div class="pure-g">
-                        <hr style="width: 90%; margin-left: 16px;"/>
-                        <div class="pure-u-2-3">
-                            <h3>Asistentes</h3>
-                            <ul class="list-unstyled icon-list">
-                                <li ng-repeat="attendee in actual_event.total_attendees">
+                </div>
+            </div>
+        </div>
+
+        <div class="pure-u-2-3" ng-show="!actual_event" style="padding: 20px;">
+
+
+            <h2 id="event-title">
+                En Estos momentos no hay evento
+            </h2>
+        </div>
+
+        <div class="pure-u-2-3" ng-show="actual_event" id="event-style">
+            <div class="pure-g">
+                <div class="pure-u-1">
+                    <h2 id="event-title">
+                        {{actual_event.summary}}
+                    </h2>
+
+                    <h2>
+                        <strong>{{actual_event.startTimeAux|date:'hh:mm a'}}</strong>
+                        -
+                        <strong>{{actual_event.endTimeAux|date:'hh:mm a'}}</strong>
+
+                    </h2>
+
+                    <h4>
+                        {{actual_event.description}}
+                    </h4>
+                </div>
+            </div>
+            <div class="pure-g">
+                <hr style="width: 90%; margin-left: 16px;"/>
+                <div class="pure-u-2-3">
+                    <h3 style="font-size:2em; color:#999;">Asistentes</h3>
+                    <ul class="list-unstyled icon-list">
+                        <li ng-repeat="attendee in actual_event.total_attendees">
                                     <span class="glyphicon"
                                           ng-class="
                                           {'glyphicon-ok' :
@@ -139,35 +139,40 @@
                                           }">
                                         {{attendee}}
                                     </span>
-                                </li>
-                            </ul>
-                        </div>
+                        </li>
+                    </ul>
+                </div>
 
-                        <!-- -->
+                <!-- -->
 
-                        <div class="pure-u-1-3">
-                            <a href="{{getCheckinURL(false)}}">
-                                <img  class="center-block" src="
+                <div class="pure-u-1-3">
+                    <a href="{{getCheckinURL(false)}}">
+                        <img class="center-block" src="
                                 {{getCheckinURL(true)}}">
-                            </a>
-                        </div>
-                    </div>
+                    </a>
                 </div>
             </div>
-            <div class="pure-g-r navbar-fixed-bottom" >
-                <div class="pure-u-1 orange3" style="min-height: 79px;">
-                    <h4>Proximos Eventos</h4>
-                    <div class="pure-u-1-5" ng-repeat="event in eventsList
-                    .slice(0,13)">
-                        <strong>{{event.startTime|date:'hh:mm a'}}</strong>
-                        -
-                        <strong>{{event.endTime|date:'hh:mm a'}}</strong>
-                        <br/>
-                        {{event.summary}}
-                    </div>
-                </div>
-            </div>
-
         </div>
-    </body>
+    </div>
+    <div class="pure-g-r ">
+        <div class="pure-u-1 orange3" id="footbar" style="min-height: 79px;">
+            <h4 id="next-event">Proximos Eventos</h4>
+
+            <div class="pure-g-r">
+                <div class="pure-u-1-5" ng-repeat="event in eventsList
+                    .slice(0,13)" id="footbar-event">
+                    <strong>{{event.startTime|date:'hh:mm a'}}</strong>
+                    -
+                    <strong>{{event.endTime|date:'hh:mm a'}}</strong>
+                    <br/>
+                    <span id="summary-event">
+                    {{event.summary}}
+                        </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
 </html>

@@ -150,3 +150,36 @@ a.pure-button-primary {
     color: #fd5026;
     line-height: 1.2em;
 }
+#getroom:hover, #getroom:active {
+    background: #ff8c65;
+color: #ffffff}
+
+#footbar {
+    color: white;
+}
+
+#summary-event {
+    color: #CF2900;
+}
+
+#footbar-event {
+    padding: 20px;
+    border-right: 1px solid #CF2900;
+}
+
+#next-event {
+    padding-left: 20px;
+    font-size: 1.3em;
+    font-weight: bold;
+}
+
+#event-style {
+    padding: 20px;
+}
+#side-bar{background: #FFF5F2}
+
+ #footbar{bottom:inherit ; position: inherit}
+
+@media screen and (min-width: 48em){
+    #footbar{bottom:0px; position: fixed}
+}
