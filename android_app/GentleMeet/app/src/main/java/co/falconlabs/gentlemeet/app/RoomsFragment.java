@@ -2,6 +2,7 @@ package co.falconlabs.gentlemeet.app;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -13,11 +14,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.appspot.www_ardux.gentlemeet.Gentlemeet;
+import com.appspot.www_ardux.gentlemeet.model.ArduxApiMessagesEventMessage;
 import com.appspot.www_ardux.gentlemeet.model.ResourceCalendar;
 import com.appspot.www_ardux.gentlemeet.model.ResourceCalendarCollection;
 import com.appspot.www_ardux.gentlemeet.model.ResourceDevice;
@@ -34,7 +37,7 @@ import java.util.List;
  */
 
 public class RoomsFragment extends Fragment {
-    private static final String LOG_TAG = "DevicesFragment";
+    private static final String LOG_TAG = RoomsFragment.class.getName();
 
     private RoomsDataAdapter listAdapter;
 
@@ -48,17 +51,16 @@ public class RoomsFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.fragment_rooms, container, false);
         ListView listView = (ListView)rootView.findViewById(R.id.rooms_list_view);
-        listAdapter = new RoomsDataAdapter((Application)getActivity().getApplication());
+        listAdapter = new RoomsDataAdapter(getActivity());
         listView.setAdapter(listAdapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-//                Intent deviceActivity = new Intent(getActivity(), DeviceActivity.class);
-//                deviceActivity.putExtra(AppConstants.DEVICE_UUID, ((ResourceDevice)listAdapter.getItem(i)).getUuid());
-//                deviceActivity.putExtra(AppConstants.DEVICE_NAME, ((ResourceDevice)listAdapter.getItem(i)).getName());
-//                deviceActivity.putExtra(AppConstants.DEVICE_LAST_SYNC, ((ResourceDevice)listAdapter.getItem(i)).getLastSync());
-//                startActivity(deviceActivity);
+               Intent roomActivity = new Intent(getActivity(), RoomActivity.class);
+               roomActivity.putExtra(AppConstants.RESOURCE_ID, ((ResourceCalendar)listAdapter.getItem(i)).getId());
+               roomActivity.putExtra(AppConstants.RESOURCE_NAME, ((ResourceCalendar)listAdapter.getItem(i)).getName());
+               startActivity(roomActivity);
             }
         });
 
@@ -154,18 +156,18 @@ public class RoomsFragment extends Fragment {
      */
     static class RoomsDataAdapter extends ArrayAdapter {
         private static LayoutInflater inflater=null;
-        private static Application app=null;
+        private static Activity activity=null;
 
-        RoomsDataAdapter(Application application) {
-            super(application.getApplicationContext(), R.layout.room_row, application.rooms);
-            app = application;
-            inflater = (LayoutInflater)application.getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        RoomsDataAdapter(Activity activity) {
+            super(activity.getApplication().getApplicationContext(), R.layout.room_row, ((Application)activity.getApplication()).rooms);
+            inflater = (LayoutInflater)activity.getApplication().getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            this.activity = activity;
         }
 
-        void replaceData(ResourceCalendar[] devices) {
+        void replaceData(ResourceCalendar[] resources) {
             clear();
-            for (ResourceCalendar device : devices) {
-                add(device);
+            for (ResourceCalendar resource : resources) {
+                add(resource);
             }
         }
 
@@ -173,10 +175,60 @@ public class RoomsFragment extends Fragment {
         public View getView(int position, View convertView, ViewGroup parent) {
             View vi=convertView;
             if(convertView==null)
-                vi = inflater.inflate(R.layout.room_row, null);
+                vi = inflater.inflate(R.layout.room_row, parent, false);
+
+            final View vi2 = vi;
             ResourceCalendar room = (ResourceCalendar)this.getItem(position);
             TextView name = (TextView)vi.findViewById(R.id.room_row_name);
             name.setText(room.getName());
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
+            final String mEmailAccount = prefs.getString("pref_email", "");
+            AsyncTask<ResourceCalendar, Void, ArduxApiMessagesEventMessage> getCalendarEvent =
+                    new AsyncTask<ResourceCalendar, Void, ArduxApiMessagesEventMessage>() {
+                        @Override
+                        protected ArduxApiMessagesEventMessage doInBackground(ResourceCalendar... resourceCalendars) {
+                            ResourceCalendar resource = null;
+                            if(resourceCalendars.length > 0){
+                                resource = resourceCalendars[0];
+                            }else{
+                                return null;
+                            }
+                            if (Strings.isNullOrEmpty(mEmailAccount)) {
+                                return null;
+                            }
+
+                            if (!AppConstants.checkGooglePlayServicesAvailable(activity)) {
+                                return null;
+                            }
+
+                            GoogleAccountCredential credential = GoogleAccountCredential.usingAudience(
+                                    activity, AppConstants.AUDIENCE);
+
+                            credential.setSelectedAccountName(mEmailAccount);
+                            // Retrieve service handle using null credential since this is an unauthenticated call.
+                            Gentlemeet apiServiceHandle = AppConstants.getApiServiceHandle(credential);
+                            try {
+                                Gentlemeet.Resource.EventCurrent getResourceCommand = apiServiceHandle.resource().eventCurrent(resource.getId());
+                                ArduxApiMessagesEventMessage event = getResourceCommand.execute();
+                                Log.i(LOG_TAG, "Event found");
+                                return event;
+                            } catch (Exception e) {
+                                Log.e(LOG_TAG, "Exception during API call", e);
+                                return null;
+                            }
+                        }
+
+                        @Override
+                        protected void onPostExecute(ArduxApiMessagesEventMessage resource) {
+                            if (resource!=null ) {
+                                TimerView tview = (TimerView)vi2.findViewById(R.id.rowTimer);
+                                tview.setEndTime(resource.getEndDateTime());
+                            } else {
+                                Log.w(LOG_TAG, "No resource was returned by the API.");
+                            }
+                        }
+                    };
+            getCalendarEvent.execute((ResourceCalendar) this.getItem(position));
             return vi;
         }
 
