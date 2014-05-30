@@ -11,7 +11,7 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
         console.log("Endpoints ready...");
 
 
-        endpointsService.eventsTodayResource ({'id':$scope.calendarId},
+        endpointsService.nextEventsTodayResource ({'id':$scope.calendarId},
             function (response) {
                 console.log("error",response);
                 if(response.error){
