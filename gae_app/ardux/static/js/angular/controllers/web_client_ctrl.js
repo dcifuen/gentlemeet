@@ -126,7 +126,7 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
                 return checkinURL;
             }
         }else{
-            return '';
+            return '#';
         }
     }
 
