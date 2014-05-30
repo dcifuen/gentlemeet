@@ -1,4 +1,4 @@
-# robots.txt for http://gentlemeet.co/
+# robots.txt for http://www.gentlemeet.co/
 
 User-agent: *
 Disallow: /admin/ # This is the administration

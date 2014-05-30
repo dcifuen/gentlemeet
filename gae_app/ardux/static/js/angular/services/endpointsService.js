@@ -37,7 +37,7 @@ gApp.service('EndpointsService', function ($q, $rootScope, $http, $window, reque
         service.apiName = api;
         service.apiVersion = version;
         //Check whether in production, staging or local
-        var isProduction = (window.location.host == 'www-ardux.appspot.com') || ( window.location.host == 'gentlemeet.co');
+        var isProduction = (window.location.host == 'www-ardux.appspot.com') || ( window.location.host == 'www.gentlemeet.co');
         var isStaging = window.location.host.indexOf("-staging") != -1;
         var serverURL = window.location.host;
         if (isProduction){
