@@ -1,82 +1,152 @@
 @charset "UTF-8";
 /* CSS Document */
-
 @import url(http://fonts.googleapis.com/css?family=Open+Sans:300italic,400,300);
 
-
 .pure-menu.pure-menu-horizontal, .pure-menu.pure-menu-horizontal .pure-menu-heading {
-	float:left;
+    float: left;
 }
+
 #gentlemenu {
-	margin: 10px 0px;
+    margin: 10px 0px;
 }
+
 .home-menu.pure-menu-open {
-	background-image:url(../img/menu-back.png);
-	background-repeat:repeat-x;
+    background-image: url(../img/menu-back.png);
+    background-repeat: repeat-x;
 }
+
 .home-menu a {
-	color: #FDCEBF;
+    color: #FDCEBF;
 }
+
 .pure-menu a, .pure-menu .pure-menu-heading {
-	padding: 0px 20px 0px 130px;
+    padding: 0px 20px 0px 130px;
 }
+
 .splash-container {
-	background-image:url(../img/gentle-room.jpg);
-	background-repeat:no-repeat;
-	background-position:center top;
-	background-color:#ff6e47;
+    background-image: url(../img/gentle-room.jpg);
+    background-repeat: no-repeat;
+    background-position: center top;
+    background-color: #ff6e47;
 }
+
 .splash-subhead {
-	background: rgba(255, 110, 71, 0.70);
-	padding: 30px;
-	text-transform: none;
-	border-radius: 0px 0px 25px 0px;
-	letter-spacing: 0.03em;
-	margin-top: 0px;
+    background: rgba(255, 110, 71, 0.70);
+    padding: 30px;
+    text-transform: none;
+    border-radius: 0px 0px 25px 0px;
+    letter-spacing: 0.03em;
+    margin-top: 0px;
 }
+
 .splash-head {
-	text-transform: none;
-	border: 0px;
-	background: rgba(253, 138, 107, 0.8);
-	margin-bottom: 0;
-	border-radius: 25px 0px 0px 0px;
-	font-size: 200%;
+    text-transform: none;
+    border: 0px;
+    background: rgba(253, 138, 107, 0.8);
+    margin-bottom: 0;
+    border-radius: 25px 0px 0px 0px;
+    font-size: 200%;
 }
+
 #gentle-video {
-	margin: 0 auto;
-	display: block;
-	padding: 80px;
-width: 720px;
+    margin: 0 auto;
+    display: block;
+    padding: 80px;
+    width: 720px;
 }
-#gentle-intro{max-width: 700px;
-margin: 0 auto 100px;}
+
+#gentle-intro {
+    max-width: 700px;
+    margin: 0 auto 100px;
+}
+
 a.pure-button-primary {
-	color:#ff8c65;
+    color: #ff8c65;
 }
+
 .content-subhead {
-	color: #ff8c65;
+    color: #ff8c65;
 }
+
 .ribbon {
-	background: #ff6e47;
-	color: #FCDDDD;
+    background: #ff6e47;
+    color: #FCDDDD;
 }
+
 .footer {
-	background: #ddd;
+    background: #ddd;
 }
+
 #price {
-	padding:30px;
-	background: #ff8c65;
+    padding: 30px;
+    background: #ff8c65;
 }
-#price-title{color:white;}
+
+#price-title {
+    color: white;
+}
+
 .price-unit {
-	background: #ff6e47;
-	margin: 10px;
-	padding: 10px;
-color: white;
+    background: #ff6e47;
+    margin: 10px;
+    padding: 10px;
+    color: white;
 }
-#price-button{background-color: #ff4e2d;
-border-radius: 1px;
-margin: 30px auto 10px;
-width: 250px;
-display: block;
-padding: 10px;}
+
+#price-button {
+    background-color: #ff4e2d;
+    border-radius: 1px;
+    margin: 30px auto 10px;
+    width: 250px;
+    display: block;
+    padding: 10px;
+}
+
+.orange1 {
+    background-color: #FDCEBF;
+}
+
+.orange2 {
+    background-color: #ff8c65;
+}
+
+.orange3 {
+    background-color: #ff6e47;
+}
+
+.orange4 {
+    background-color: #ff4e2d;
+}
+
+#header {
+    padding: 20px;
+    text-align: center;
+}
+
+#content {
+    text-align: center;
+    margin: 50px 0;
+    color: #fd5026;
+}
+
+#event-title {
+    font-size: 3.5em;
+    color: #999;
+}
+
+#timer {
+    font-size: 4em;
+    margin-top: 0px;
+}
+
+#getroom {
+    padding: 40px 20px;
+    text-align: center;
+}
+
+#getroom a {
+    font-size: 2em;
+    font-weight: bold;
+    color: #fd5026;
+    line-height: 1.2em;
+}
