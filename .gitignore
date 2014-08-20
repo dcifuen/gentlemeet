@@ -59,4 +59,4 @@ docs/_build/
 # Don't store secret keys in version control
 secret_keys.py
 android_app/GentleMeet/secret_keys
-build.gradle
+android_app/GentleMeet/.gradle
