@@ -38,6 +38,52 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
             endpointsService.quickAddResource ({'id':$scope.calendarId},function (response) {
                 if(response.error){
                     console.log('Error in quick add', response);
+                }else{
+                    console.log('Event was added');
+                    var startTime = new Date(response.start_date_time);
+                    var endTime = new Date(response.end_date_time);
+                    var now = new Date();
+
+                    response.duration = (endTime - now) / 1000
+                    response.checkinURL = '';
+                    response.startTimeAux = startTime;
+                    response.endTimeAux = endTime;
+                    response.total_attendees = [];
+                    if(!response.actual_attendees){
+                        response.actual_attendees = [];
+                    }
+
+                    if(response.no_response_attendees){
+                        response.total_attendees = response.total_attendees.concat(response.no_response_attendees);
+                    }
+                    if(response.yes_attendees){
+                        response.total_attendees = response.total_attendees.concat(response.yes_attendees);
+                    }
+                    if(response.maybe_attendees){
+                        response.total_attendees = response.total_attendees.concat()
+                    }
+
+                    if(response.actual_attendees){
+                        for(var i in response.actual_attendees){
+                            attendee = response.actual_attendees[i];
+                            if(response.total_attendees.indexOf(attendee) < 0){
+                              response.total_attendees.push(attendee);
+                            }
+                        }
+                    }
+
+                    if(!$scope.actual_event ||
+                        ($scope.actual_event && response.id && response.id != $scope.actual_event.id)
+                      ){
+                        $scope.disable_finish_event = false;
+                        $scope.actual_event = response;
+                        $scope.countdownTimer  = $timeout($scope.onTimeout, 1000);
+                    }else if($scope.actual_event){
+                        $scope.actual_event.total_attendees = response.total_attendees;
+                        $scope.actual_attendees = response.actual_attendees;
+                    }
+
+                    $scope.actual_event = response;
                 }
             });
         }
@@ -46,6 +92,8 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
     $scope.event_current_resource = function(){
         endpointsService.eventCurrentResource({'id':$scope.calendarId},
             function(response){
+                console.log('event_current_resource',response);
+
                 if(response.error){
                     $scope.actual_event = null;
                 }else{
@@ -119,14 +167,13 @@ gApp.controller('testCtrl', ['$scope', '$timeout','EndpointsService', function (
         }
     }
 
-    $scope.finish_event= function(){
+    $scope.finish_event = function(){
         $scope.disable_finish_event = true;
         if($scope.actual_event){
             endpointsService.finishEvent({'id':$scope.actual_event.id}, function(response){
-
                 console.log(response);
-
-                console.log('Event was finished')
+                console.log('Event was finished');
+                $scope.actual_event = null;
             });
         }
     }
