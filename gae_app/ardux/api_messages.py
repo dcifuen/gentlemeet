@@ -72,4 +72,7 @@ class EventsResponseMessage(messages.Message):
 
 ID_RESOURCE = endpoints.ResourceContainer(
     VoidMessage,
-    id=messages.StringField(1,  required=True))
+    id=messages.StringField(1,  required=True),
+    userEmail=messages.StringField(2, required=False)
+
+)

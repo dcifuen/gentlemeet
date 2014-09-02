@@ -68,22 +68,27 @@ class GentleMeetApi(remote.Service):
                       http_method='POST')
     def check_in(self, request):
         """
-        Checks a user in a meeting. If there is not a logged in user throws an
+        Checks a user in a meeting. If there is not logged in user, then it must
+        be set in the arguments user or it throws an
         exception. If the event doesn't exists throws an exception. If the user
         is already checked in throws an exception.
         """
         current_user = endpoints.get_current_user()
         if current_user is None:
-            raise endpoints.UnauthorizedException(
-                'Invalid token. Please authenticate first')
+            current_user_email = request.userEmail
+            if not current_user_email:
+                raise endpoints.UnauthorizedException(
+                    'Invalid token. Please authenticate first or give a user')
+        else:
+            current_user_email = current_user.email()
         logging.info('Checking in user: [%s] event ID: [%s]',
-                     current_user.email(), request.id)
+                     current_user_email, request.id)
         event = ResourceEvent.get_by_id(request.id)
         if not event:
             raise endpoints.BadRequestException(
-                'Unable to find event with id %s' % request.id)
+                'Unable to find event with the given id')
 
-        if CheckInOut.already_checked(constants.CHECK_IN, current_user.email(),
+        if CheckInOut.already_checked(constants.CHECK_IN, current_user_email,
                                       event):
             raise endpoints.BadRequestException(
                 'User have already checked in')
@@ -108,9 +113,9 @@ class GentleMeetApi(remote.Service):
                     'The event has not started')
 
         # Here goes the actual check in logic
-        store_check_in(event, current_user.email())
+        store_check_in(event, current_user_email)
 
-        return CheckInOutMessage(userEmail=current_user.email())
+        return CheckInOutMessage(userEmail=current_user_email)
 
 
     @endpoints.method(ID_RESOURCE, CheckInOutMessage,
@@ -126,31 +131,34 @@ class GentleMeetApi(remote.Service):
         """
         current_user = endpoints.get_current_user()
         if current_user is None:
-            raise endpoints.UnauthorizedException(
-                'Invalid token. Please authenticate first')
-
+            current_user_email = request.userEmail
+            if not current_user_email:
+                raise endpoints.UnauthorizedException(
+                    'Invalid token. Please authenticate first or give a user')
+        else:
+            current_user_email = current_user.email()
         logging.info('Checking out user: [%s] event ID: [%s]',
-                     current_user, request.id)
+                     current_user_email, request.id)
 
         event = ResourceEvent.get_by_id(request.id)
         if not event:
             raise endpoints.BadRequestException(
                 'Unable to find event with id %s' % request.id)
 
-        if CheckInOut.already_checked(constants.CHECK_OUT, current_user.email(),
+        if CheckInOut.already_checked(constants.CHECK_OUT, current_user_email,
                                       event):
             raise endpoints.BadRequestException(
                 'User have already checked out')
 
-        if not CheckInOut.checked_in_before(current_user.email(), event,
+        if not CheckInOut.checked_in_before(current_user_email, event,
                                             datetime.now()):
             raise endpoints.BadRequestException(
                 'The user did not checked in or checked in the future')
 
-        CheckInOut(parent=event.key, attendee=current_user.email(),
+        CheckInOut(parent=event.key, attendee=current_user_email,
                    type=constants.CHECK_OUT).put()
 
-        return CheckInOutMessage(userEmail=current_user.email())
+        return CheckInOutMessage(userEmail=current_user_email)
 
     @endpoints.method(ID_RESOURCE, EventMessage,
                       path='event/{id}/finish',
@@ -161,8 +169,14 @@ class GentleMeetApi(remote.Service):
         Mark an event as finished and set the actual end time as right now.
         Updates the Google Calendar event accordingly.
         """
-        logging.info('Someone just marked event ID [%s] as finished',
-                     request.id)
+        current_user = endpoints.get_current_user()
+        if current_user is None:
+            current_user_email = request.userEmail
+        else:
+            current_user_email = current_user.email()
+        # TODO: Can really anyone finish an event?
+        logging.info('Someone [%s] just marked event ID [%s] as finished',
+                     current_user_email, request.id)
 
         event = ResourceEvent.get_by_id(request.id)
         if not event:
