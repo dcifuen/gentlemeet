@@ -125,3 +125,23 @@ def sync_resource_events(resource_id, resource_email):
         logging.warn("No client found for events sync")
 
 
+def check_release_resource():
+    """
+    Checks over all the resources and check for events that haven't started in
+    the limit amount  of time and frees the resource for another possible meeting
+    """
+    for resource in ResourceCalendar.get_all():
+        current = resource.get_current_event()
+        if current and current.state == constants.STATE_SCHEDULED:
+            now = datetime.datetime.now()
+            release_delta = datetime.timedelta(minutes=constants.RELEASE_MINUTES)
+            if current.start_date_time + release_delta < now:
+                logging.info('Event [%s] didnt get check ins, releasing it',
+                              current.title)
+                current.state = constants.STATE_CANCELLED
+                current.put()
+
+
+
+
+

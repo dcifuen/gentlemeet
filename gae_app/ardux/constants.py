@@ -73,3 +73,4 @@ QUICK_ADD_TITLE = 'Quick Meeting'
 
 QUICK_ADD_DESCRIPTION = 'Quick meeting, created by %s' % SOURCE_APP_NAME
 
+RELEASE_MINUTES = 10
