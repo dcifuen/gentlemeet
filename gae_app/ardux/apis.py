@@ -303,8 +303,14 @@ class GentleMeetApi(remote.Service):
             raise endpoints.BadRequestException(
                 'Unable to create the Google Calendar event')
         # Save in datastore
+        user = ''
+        if request.userEmail:
+            user = request.userEmail
+        else:
+            user = client.installer_user
+
         resource_event = ResourceEvent(
-            organizer=request.userEmail,
+            organizer=user,
             original_start_date_time=now,
             original_end_date_time=end_time,
             actual_start_date_time=now,
@@ -317,5 +323,5 @@ class GentleMeetApi(remote.Service):
             'id']))
         resource_event.put()
 
-        store_check_in(resource_event, request.userEmail)
+        store_check_in(resource_event, user)
         return event_db_to_rcp(resource_event)
