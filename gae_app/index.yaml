@@ -14,3 +14,9 @@ indexes:
   properties:
   - name: resource_key
   - name: original_start_date_time
+
+- kind: ResourceEvent
+  properties:
+  - name: resource_key
+  - name: state
+  - name: original_start_date_time

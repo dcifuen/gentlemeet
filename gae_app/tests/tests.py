@@ -10,8 +10,6 @@ import datetime
 from google.appengine.ext import testbed, deferred, ndb
 
 from apis import GentleMeetApi
-from constants import CHECK_IN
-from models import ResourceEvent, CheckInOut
 
 
 USAGE = """

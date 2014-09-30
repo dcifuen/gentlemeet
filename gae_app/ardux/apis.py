@@ -14,6 +14,7 @@ from ardux.models import ResourceDevice, ResourceCalendar, ResourceEvent, \
     CheckInOut, store_check_in
 from helpers import CalendarHelper
 from models import Client
+from tasks import validate_release
 
 
 @endpoints.api(name='gentlemeet', version='v1',
@@ -230,6 +231,7 @@ class GentleMeetApi(remote.Service):
 
         items = []
         for resource_event in resource.get_next_events_today():
+            validate_release(resource_event)
             items.append(event_db_to_rcp(resource_event))
         return EventsResponseMessage(items=items)
 
@@ -256,6 +258,9 @@ class GentleMeetApi(remote.Service):
         if not resource_event:
             raise endpoints.BadRequestException(
                 'There is no event happening at the resource now')
+
+        validate_release(resource_event)
+
         return event_db_to_rcp(resource_event)
 
 

@@ -47,7 +47,7 @@ def sync_resources():
                     "Deleted %s resources from data store" % len(delete_keys))
 
             else:
-                logging.warn("Application not authorized with Google Apis")
+                logging.warn("Application not authorized with Google API")
         except Exception, e:
             logging.exception("Error ocurred syncing resources")
     else:
@@ -89,14 +89,15 @@ def sync_resource_events(resource_id, resource_email):
 
                     no_response_attendees = []
                     maybe_attendees = []
-                    yes_attendees= []
-                    no_attendees=[]
+                    yes_attendees = []
+                    no_attendees = []
 
-                    for attendee in event.get('attendees',[]):
+                    for attendee in event.get('attendees', []):
                         if not attendee.get('resource', False):
                             attendee_email = attendee['email']
                             logging.info('Adding attendee %s response %s',
-                                         attendee_email, attendee['responseStatus'])
+                                         attendee_email,
+                                         attendee['responseStatus'])
                             if attendee['responseStatus'] == "accepted":
                                 yes_attendees.append(attendee_email)
                             elif attendee['responseStatus'] == "tentative":
@@ -114,7 +115,9 @@ def sync_resource_events(resource_id, resource_email):
                     event_db.resource_key = ndb.Key(ResourceCalendar,
                                                     resource_id)
                     event_db.summary = event['summary']
-                    event_db.description = event.get('description','')
+                    event_db.description = event.get('description', '')
+                    if not event_db.state:
+                        event_db.state = constants.STATE_SCHEDULED
                     event_db.put()
 
             else:
@@ -132,14 +135,27 @@ def check_release_resource():
     """
     for resource in ResourceCalendar.get_all():
         current = resource.get_current_event()
-        if current and current.state == constants.STATE_SCHEDULED:
-            now = datetime.datetime.now()
-            release_delta = datetime.timedelta(minutes=constants.RELEASE_MINUTES)
-            if current.start_date_time + release_delta < now:
-                logging.info('Event [%s] didnt get check ins, releasing it',
-                              current.title)
-                current.state = constants.STATE_CANCELLED
-                current.put()
+        validate_release(current)
+
+
+def validate_release(event):
+    """
+    Validate if the resource for the given event has to be release due to nobody
+      has checked in yet.
+    :param event: the event object to validate
+    :return:
+    """
+    if event and event.state == constants.STATE_SCHEDULED:
+        now = datetime.now()
+        release_delta = timedelta(minutes=constants.RELEASE_MINUTES)
+        if event.start_date_time + release_delta < now:
+            logging.info('Event [%s] didnt get check ins, releasing it',
+                         event.title)
+            event.state = constants.STATE_CANCELLED
+            event.put()
+            #TODO: Trigger event update in calendar?
+            return True
+    return False
 
 
 

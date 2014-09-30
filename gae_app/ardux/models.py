@@ -212,8 +212,7 @@ class ResourceEvent(EndpointsModel):
     summary = ndb.StringProperty(indexed=False)
     description = ndb.StringProperty(indexed=False)
     is_express = ndb.BooleanProperty(indexed=False)
-    state = ndb.StringProperty(choices=constants.EVENT_STATE_CHOICES,
-                               indexed=False)
+    state = ndb.StringProperty(choices=constants.EVENT_STATE_CHOICES)
 
     def ResourceSet(self, value):
         if value:
