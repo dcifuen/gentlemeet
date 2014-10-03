@@ -8,7 +8,8 @@ def namespace_manager_default_namespace_for_request():
     """
     from ardux import get_environment, constants
     environment = get_environment()
-    namespace = 'staging' if environment == constants.ENV_STAGING else None
+    namespace = 'staging' if environment == constants.ENV_STAGING else \
+        'eforcers.com'
     return namespace
 
 
